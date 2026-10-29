@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>达芙拍卖估价器</title>
+<script>try{var t=localStorage.getItem('dafu-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<style>
+:root{--bg:#f2f3f9;--card:#fff;--line:#dcdfee;--tx:#1a1e35;--mu:#666c90;--in:#eceef8;--pur:#8b5cf6;--gold:#d99a14;--red:#e8374f;--btn:#1a1e35;--btnt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1021;--card:#161a30;--line:#2a3050;--tx:#eceefa;--mu:#9a9fc4;--in:#0d1021;--pur:#a78bfa;--gold:#f2b84b;--red:#ff5468;--btn:#eceefa;--btnt:#0d1021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1021;--card:#161a30;--line:#2a3050;--tx:#eceefa;--mu:#9a9fc4;--in:#0d1021;--pur:#a78bfa;--gold:#f2b84b;--red:#ff5468;--btn:#eceefa;--btnt:#0d1021;color-scheme:dark}
+:root{--grn:#2fa66a;--est:#ff8a00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--grn:#4fd18b;--est:#ffb020}}
+:root[data-theme="dark"]{--grn:#4fd18b;--est:#ffb020}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 "PingFang SC","Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+main{max-width:560px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:26px;font-weight:900;letter-spacing:.02em;margin:4px 0 2px}
+.sub{color:var(--mu);margin:0 0 22px;font-size:14px}
+.step{margin:0 0 26px}
+.step h2{font-size:17px;margin:0 0 2px;line-height:1.5}
+.hint{margin:0 0 10px;color:var(--mu);font-size:13.5px}
+button,input{font-family:inherit}
+.st{display:flex;gap:8px}
+.st button{width:52px;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:22px;border-radius:12px;cursor:pointer}
+.st button:active{transform:scale(.95)}
+.st input{flex:1;min-width:0;text-align:center;font-weight:800;font-size:26px;line-height:1;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:var(--in);color:var(--tx)}
+input:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--pur);outline-offset:2px}
+.lb{font-size:13px;color:var(--mu);font-weight:700;margin:12px 0 6px}
+.ls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.it{position:relative;border:2px solid;border-radius:12px;color:var(--tx)}
+.tg{display:flex;flex-direction:column;gap:1px;width:100%;text-align:left;padding:9px 12px;border:0;background:none;color:inherit;cursor:pointer;font-size:14px;line-height:1.35}
+.tg span{font-weight:800;font-variant-numeric:tabular-nums}
+.it.r{border-color:var(--red);background:color-mix(in srgb,var(--red) 13%,transparent)}
+.it.g{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 15%,transparent)}
+.it.r.on{background:var(--red);color:#fff}
+.it.g.on{background:var(--gold);color:#261a00}
+.qt{display:flex;align-items:center;justify-content:space-between;padding:0 10px 9px}
+.qt button{width:38px;height:30px;padding:0;border-radius:8px;border:1.5px solid currentColor;background:transparent;color:inherit;font-size:18px;line-height:1;cursor:pointer}
+.qt b{font-size:17px;font-variant-numeric:tabular-nums}
+.del{position:absolute;top:-7px;right:-5px;width:22px;height:22px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--mu);font-size:14px;line-height:1;cursor:pointer}
+.sm{margin:12px 0 0;font-weight:700;font-size:14px}
+.ad summary{cursor:pointer;color:var(--mu);font-size:14px;margin-top:10px}
+.af{display:grid;gap:8px;margin-top:8px}
+.af input{font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--in);color:var(--tx);min-width:0}
+.cc{display:flex;gap:8px}
+.cc button{flex:1;padding:10px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--mu);font-weight:700;font-size:14px;cursor:pointer}
+.cc .r.on{border-color:var(--red);background:var(--red);color:#fff}
+.cc .g.on{border-color:var(--gold);background:var(--gold);color:#261a00}
+.go{padding:11px;border-radius:12px;border:0;background:var(--btn);color:var(--btnt);font-weight:700;font-size:15px;cursor:pointer}
+.am{margin:0;color:var(--red);font-size:13px;min-height:0}
+.res{margin-top:6px;padding:20px 18px;border-radius:20px;background:var(--tx);color:var(--bg)}
+.res .k{font-size:13px;opacity:.7;margin:0}
+.est{font-size:56px;font-weight:900;line-height:1.1;margin:2px 0 6px;font-variant-numeric:tabular-nums}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--bg) 22%,transparent)}
+.row b{font-variant-numeric:tabular-nums;text-align:right}
+.chips{display:flex;gap:8px;margin:4px 0 8px}
+.chip{border:1px solid color-mix(in srgb,var(--bg) 40%,transparent);background:transparent;color:var(--bg);padding:7px 16px;border-radius:999px;font-weight:600;font-size:14px;cursor:pointer}
+.chip.on{background:var(--bg);color:var(--tx);border-color:var(--bg)}
+.warn{color:#ffb4bf;font-size:13.5px;margin:6px 0 0}
+.fm{font-size:12.5px;opacity:.7;margin:8px 0 0}
+.cd{margin-top:22px}
+.cd h2{font-size:17px;margin:0 0 2px;line-height:1.5}
+.fl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:8px 0 4px;font-size:14px;color:var(--mu)}
+.fl input{width:80px;font-size:16px;font-weight:700;text-align:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--in);color:var(--tx)}
+#chart svg{width:100%;height:auto;display:block}
+.cg{stroke:var(--line)}
+.ct{fill:var(--mu);font-size:11px}
+.cv{fill:var(--tx);font-size:12px;font-weight:700}
+.bd{fill:color-mix(in srgb,var(--red) 62%,transparent)}
+.bu{fill:color-mix(in srgb,var(--grn) 62%,transparent)}
+.be{fill:var(--est);stroke:var(--tx);stroke-width:2}
+.cex{fill:var(--tx);font-size:12px;font-weight:800}
+.cb{stroke:var(--pur);stroke-width:2;stroke-dasharray:6 5}
+.ctb{fill:var(--pur);font-size:12px;font-weight:700}
+.cev{fill:var(--tx);font-size:15px;font-weight:900}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+.tr{padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:var(--tx);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:13px}
+.tr span{font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.tr.on{border-color:var(--pur);background:color-mix(in srgb,var(--pur) 16%,transparent)}
+.rs{display:block;margin:18px auto 0;background:none;border:1px solid var(--line);color:var(--mu);padding:9px 22px;border-radius:999px;font-size:14px;cursor:pointer}
+.note{color:var(--mu);font-size:12.5px;text-align:center;margin:14px 0 0}
+.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 16px;margin:0 0 22px}
+.top h1{margin:4px 0 2px}
+.top .sub{margin:0}
+.tools{display:flex;flex-wrap:wrap;gap:8px}
+.seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.seg button{border:0;background:transparent;color:var(--mu);padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer}
+.seg button.on{background:var(--tx);color:var(--bg)}
+.lay{display:none}
+.step .rs{margin:14px 0 0}
+@media (min-width:900px){
+main{max-width:1120px;padding:28px 32px 48px}
+.lay{display:inline-flex}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:start}
+.cols.sw .in{order:2}
+.out{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;padding:0 2px}
+.ls{grid-template-columns:repeat(3,1fr)}
+}
+body:not(.mode1) .m1{display:none}
+body.mode1 .m0{display:none}
+.fl input.rg{flex:1;min-width:140px;width:auto;padding:0;border:0;background:none;accent-color:var(--pur)}
+.rt{display:grid;gap:6px;margin-top:6px}
+/* 反推结果紧凑分组；平均值固定，方案区约显示五条并可独立滚动 */
+.result-panel{border:1px solid var(--line);border-radius:12px;padding:9px;background:color-mix(in srgb,var(--card) 70%,transparent)}
+.result-panel .sortbar{display:flex;align-items:center;gap:8px;margin:0 0 8px}
+.result-panel .sortbar .lb{margin:0!important;white-space:nowrap;font-size:12px}
+#sortMode{width:auto!important;max-width:100%;min-width:0;padding:6px 24px 6px 8px!important;margin:0!important;font-size:12.5px!important;flex:1}
+#rtab .ravg{margin-bottom:6px}
+/* 金品利用率：核心摘要常驻可见，明细独立滚动，避免挤压估价方案 */
+.utilbox{border:1px solid var(--line);border-radius:10px;padding:8px;margin:4px 0 8px;background:var(--card);color:var(--tx)}
+.utiltitle{font-weight:800;font-size:14px;margin:0 0 5px}
+.utilsummary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin-bottom:7px}
+.utilmetric{border-radius:8px;background:var(--in);padding:6px 4px;text-align:center;min-width:0}
+.utilmetric b{display:block;font-size:17px;line-height:1.25;font-variant-numeric:tabular-nums}
+.utilmetric span{display:block;font-size:10.5px;color:var(--mu);line-height:1.3}
+.utilhead,.utilrow{display:grid;grid-template-columns:minmax(0,1fr) 50px 42px 48px;gap:4px;align-items:center}
+.utilhead{font-size:10.5px;color:var(--mu);padding:3px 2px;border-bottom:1px solid var(--line)}
+.utilrows{max-height:220px;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.utilrow{font-size:11.5px;padding:5px 2px;border-bottom:1px solid color-mix(in srgb,var(--line) 65%,transparent);font-variant-numeric:tabular-nums}
+.utilrow:last-child{border-bottom:0}.utilrow .un{overflow-wrap:anywhere;line-height:1.25}.utilrow .num{text-align:right;white-space:nowrap}
+.utilbar{height:4px;background:var(--in);border-radius:99px;overflow:hidden;margin-top:3px}.utilbar i{display:block;height:100%;background:var(--grn)}
+.utilnote{font-size:10.5px;color:var(--mu);margin:5px 0 0;line-height:1.35}
+@media(max-width:380px){.utilhead,.utilrow{grid-template-columns:minmax(0,1fr) 43px 34px 43px}.utilrow{font-size:10.5px}.utilmetric b{font-size:15px}}
+#rtab .rscroll{display:grid;gap:6px;max-height:390px;overflow-y:auto;overscroll-behavior:contain;padding:1px 3px 1px 0;scrollbar-width:thin}
+#rtab .rscroll .rw{margin:0}
+#rtab details.scheme{border:1px solid var(--line);border-radius:10px;padding:7px;background:var(--card)}
+#rtab details.scheme>summary{cursor:pointer;font-weight:700;font-size:13px;line-height:1.45;padding:4px 2px;list-style-position:inside}
+#rtab .subcombo{display:grid;gap:5px;margin:7px 0 2px;padding-left:5px}
+#rtab .subcombo .rw{font-size:12px;padding:8px 9px}
+#rtab .subhead{font-size:11px;color:var(--mu);margin:5px 0 2px}
+#rtab .schemehint{font-size:11px;color:var(--mu);margin:4px 0 0}
+@media(max-width:480px){.result-panel{padding:7px}#rtab .rscroll{max-height:370px}.rw{padding:8px 9px}.rw b{font-size:14px}.rw small{font-size:11px}}
+.rw{display:block;width:100%;text-align:left;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--tx);cursor:pointer;font-size:13.5px;line-height:1.45}
+.rw.on{border-color:var(--pur);background:color-mix(in srgb,var(--pur) 14%,transparent)}
+.rw b{font-size:16px;font-variant-numeric:tabular-nums}
+.rw small{display:block;color:var(--mu);font-size:12px}
+/* 结果卡片轻量入场：仅使用 opacity/transform，避免影响布局与计算性能 */
+@keyframes resultEnter{from{opacity:0;transform:translate3d(0,7px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
+#rtab .rw{animation:resultEnter .22s ease-out both}
+#rtab .rw:nth-child(2){animation-delay:.025s}
+#rtab .rw:nth-child(3){animation-delay:.05s}
+#rtab .rw:nth-child(4){animation-delay:.075s}
+#rtab .rw:nth-child(5){animation-delay:.1s}
+@media (prefers-reduced-motion:reduce){#rtab .rw{animation:none}}
+.ngs{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.ngs li{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12.5px;background:var(--card)}
+.ng>summary{margin-top:0;padding:12px 14px;border:2px solid var(--gold);border-radius:12px;color:var(--tx);font-weight:800;background:color-mix(in srgb,var(--gold) 14%,transparent)}
+.settings{margin:0 0 14px}.setting-field{font-size:14px;font-weight:600}.settings .hint{margin:10px 0 0}.ngw{margin-top:22px}
+.ngs li.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 15%,transparent)}
+.gb{border:1px solid var(--line);background:transparent;color:inherit;border-radius:6px;min-width:26px;height:26px;padding:0 4px;cursor:pointer;font-size:14px;line-height:1}
+.gadd{border:0;background:none;color:inherit;cursor:pointer;font:inherit;padding:0}
+.mk{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);animation:veilIn .22s ease both}
+.mk[hidden]{display:none}
+.mb{max-width:420px;width:100%;max-height:min(82vh,680px);overflow:auto;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 24px 80px #0004;animation:popIn .28s cubic-bezier(.2,.8,.2,1) both}
+@keyframes veilIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.mk,.mb{animation:none}}
+.mb p{margin:0 0 16px;line-height:1.7}
+.mb .ft{display:flex;justify-content:flex-end;gap:8px}.modal-title{font-size:18px;font-weight:850;margin:0 0 14px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.modal-actions button{min-width:96px}.settings-trigger{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap}.result-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.result-heading h2{margin:0}
+.top>div:first-child{flex:1 1 200px}.corner{display:flex;gap:8px;align-items:center;align-self:flex-start;order:3}.corner .settings-trigger{display:inline-flex;align-items:center;gap:4px}.corner #openSettings2{display:none}
+@media(max-width:899px){.corner{order:1;margin-left:auto}.corner #openSettings2{display:inline-flex}.tools{order:4;flex-basis:100%}.pane.out,.rsec,main>.rs{display:none!important}}
+select.sf{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit;padding:10px}
+.logl h3{margin:12px 0 4px;font-size:14px}.logl ul{margin:0;padding-left:18px;line-height:1.6;font-size:13.5px}
+#rtab .gh{display:flex;align-items:center;gap:8px;margin:6px 0 0;font-size:12.5px;font-weight:800}#rtab .gh::after{content:"";flex:1;height:2px;border-radius:2px;background:currentColor;opacity:.3}#rtab .gh.z{color:var(--grn)}#rtab .gh.e{color:var(--gold)}
+#rtab .sep{border-top:2px dashed var(--line);margin:12px 0 2px}#rtab .zgroup{display:grid;gap:6px}
+#rtab details.more{border:1px dashed var(--line);border-radius:10px;padding:4px 7px}#rtab details.more>summary{cursor:pointer;font-size:12.5px;font-weight:700;padding:5px 2px;color:var(--mu)}
+.mb .go{padding:10px 18px}
+.fl select.x{font-size:15px;font-weight:700;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--in);color:var(--tx);max-width:100%}
+.ic{width:1.1em;height:1.1em;vertical-align:-.2em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;pointer-events:none}.st .ic{width:22px;height:22px}.seg .ic{margin-right:4px}
+#bar,#barScrim{display:none}
+@media(max-width:899px){
+#barScrim:not([hidden]){display:block;position:fixed;inset:0;z-index:4;background:rgba(0,0,0,.4)}
+#bar{display:block;position:fixed;left:0;right:0;bottom:0;z-index:5;font-size:14px}
+#barHead{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--tx);color:var(--bg);border:0;font:inherit;cursor:pointer}
+#barHead b{font-size:22px;font-variant-numeric:tabular-nums}
+#barHead .ar{width:22px;height:22px;transition:transform .2s}
+#bar.open #barHead .ar{transform:rotate(180deg)}
+#barBody{background:var(--card);color:var(--tx);border-radius:16px 16px 0 0;border-top:1px solid var(--line);max-height:62vh;overflow-y:auto;overscroll-behavior:contain;padding:12px 14px}
+#barBody[hidden]{display:none}
+.bt{display:flex;gap:6px;margin-bottom:10px}
+.bt button{flex:1;padding:8px 4px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--tx);font:inherit;font-weight:700;cursor:pointer}
+.bt button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.br{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.br:first-child{border-top:0}
+.br b{font-variant-numeric:tabular-nums;text-align:right}
+.br.hl b{color:var(--est);font-size:18px}
+main{padding-bottom:84px}}
+
+#bar{filter:drop-shadow(0 -4px 14px rgba(0,0,0,.18))}
+#barPk{position:absolute;left:50%;top:-24px;transform:translateX(-50%);width:72px;height:26px;display:flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:14px 14px 0 0;background:var(--tx);color:var(--bg);cursor:pointer;transition:background-color .3s,color .3s}
+#barPk .ar{width:22px;height:22px;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+#bar.open #barPk{background:var(--card);color:var(--tx);border:1px solid var(--line);border-bottom:0}
+#bar.open #barPk .ar{transform:rotate(180deg)}
+#barHead .ar{display:none}
+#bar .bt{display:flex;gap:6px;margin:0 0 10px}
+#bar .bt button{flex:1;padding:8px 6px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--tx);font:inherit;font-size:13px}
+#bar .bt button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+#barBody:not([hidden]){animation:sheetUp .34s cubic-bezier(.2,.8,.2,1)}
+#barScrim:not([hidden]){animation:fadeIn .25s ease-out}
+#bar .bs:not([hidden]){animation:fadeIn .24s ease-out}
+#bar .br{animation:rise .3s cubic-bezier(.2,.8,.2,1) both}
+#bar .br:nth-child(2){animation-delay:.03s}#bar .br:nth-child(3){animation-delay:.06s}#bar .br:nth-child(4){animation-delay:.09s}#bar .br:nth-child(5){animation-delay:.12s}#bar .br:nth-child(n+6){animation-delay:.15s}
+@keyframes sheetUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes rise{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+@keyframes numPop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.pop{display:inline-block;animation:numPop .4s cubic-bezier(.2,.8,.2,1)}
+body{transition:background-color .35s,color .35s}
+.step,.cd,.res,.rs,.top{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+.step:nth-of-type(2){animation-delay:.05s}.step:nth-of-type(3){animation-delay:.1s}.step:nth-of-type(4){animation-delay:.15s}.cd{animation-delay:.12s}
+button,.chip,select,input,summary{transition:transform .15s,background-color .25s,border-color .25s,color .25s,opacity .2s,box-shadow .25s}
+button:active:not(:disabled),.chip:active{transform:scale(.95)}
+button:disabled{opacity:.6}
+input:focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 35%,transparent)}
+details[open]>:not(summary){animation:fadeIn .28s ease-out}
+details>summary{cursor:pointer}
+.cc button,.seg button,.tiers button{transition:transform .15s,background-color .25s,color .25s,border-color .25s}
+#chart svg *{transition:all .5s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+#barBody{touch-action:pan-y;max-height:68vh;-webkit-user-select:none;user-select:none}
+#barBody input,#barBody select{-webkit-user-select:text;user-select:text}
+#bar .bs.sinR{animation:sinR .32s cubic-bezier(.2,.8,.2,1)}
+#bar .bs.sinL{animation:sinL .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes sinR{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}}
+@keyframes sinL{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-up" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m20 6-11 11-5-5"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 21V11M12 21V4M19 21v-8"/></symbol><symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></symbol><symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol><symbol id="i-auto" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></symbol><symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol></svg>
+<div class="mk" id="notice" role="dialog" aria-modal="true" aria-label="提示"><div class="mb"><p>达芙外规金均估价仅为经验参考模型！红件实际价值浮动大，预设8w/10w并非真实定值，金均与紫件数只能缩小区间，无法精确算出真实货值，存在误差，容易高估拍亏。</p><div class="ft"><button class="go" id="nok">知道了，不再提示</button></div></div></div>
+<div class="mk" id="settingsModal" role="dialog" aria-modal="true" aria-label="设置" hidden><div class="mb">
+<h2 class="modal-title"><svg class="ic"><use href="#i-sliders"/></svg> 计算设置</h2>
+<div class="af" style="margin-top:8px;display:grid;grid-template-columns:1fr;gap:14px">
+<label class="setting-field">计算限时<select id="inferSeconds" style="display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit;padding:10px"><option value="3">3 秒</option><option value="5" selected>5 秒</option><option value="8">8 秒</option><option value="10">10 秒</option><option value="15">15 秒</option></select></label>
+<label class="setting-field">最低金藏品数<select id="minGoldCount" style="display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit;padding:10px"><option value="1" selected>1 件</option><option value="2">2 件</option><option value="3">3 件</option><option value="4">4 件</option><option value="5">5 件</option><option value="6">6 件</option><option value="7">7 件</option><option value="8">8 件</option><option value="9">9 件</option><option value="10">10 件</option></select></label>
+<label class="setting-field">零误差条目数<select id="zeroLimit" class="sf"><option value="3">3 条</option><option value="5">5 条</option><option value="8">8 条</option><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option><option value="30">30 条</option><option value="0" selected>不限</option></select></label>
+<label class="setting-field">带误差条目数<select id="errLimit" class="sf"><option value="3">3 条</option><option value="5">5 条</option><option value="8">8 条</option><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option><option value="30">30 条</option><option value="0" selected>不限</option></select></label>
+</div><p class="hint" style="margin-top:12px">限时结束后返回已找到的方案；金藏品少于下限的组合会被过滤。条目数最少 3 条，既是搜索目标也是显示上限；选「不限」会一直搜到计算限时结束，想要几百条建议把计算限时调到 8–15 秒。总价值估算按全部找到的方案计算。</p>
+<div class="modal-actions"><button class="go" id="settingsClose">关闭</button></div>
+</div></div>
+<div class="mk" id="logModal" role="dialog" aria-modal="true" aria-label="公告" hidden><div class="mb">
+<h2 class="modal-title"><svg class="ic"><use href="#i-bell"/></svg> 公告 · 更新日志</h2>
+<div class="logl">
+<h3>第9轮</h3><ul><li>条目数设置现在会真正影响搜索：选「不限」不再找到几个就停，会搜到计算限时结束，可找到几百条以上；新增 50 / 100 / 300 条档位。</li></ul>
+<h3>第8轮</h3><ul><li>反推表：零误差方案默认显示 3 条，其余点击展开；零误差与带误差方案之间加了分界线和标题。</li></ul>
+<h3>第7轮</h3><ul><li>设置新增「零误差条目数」「带误差条目数」，最少 3 条，可选不限；右上角新增公告按钮。</li></ul>
+<h3>第6轮</h3><ul><li>窄屏去掉「所见大金」以下的区块（已并入底部抽屉）；设置入口在窄屏移到右上角，桌面端不变。</li></ul>
+<h3>第1–5轮</h3><ul><li>输入后自动计算、回车跳转、默认限时 3 秒；SVG 图标；窄屏底部固定条（价格明细 / 建议出价 / 反推表，可左右滑动）；金均自动切换模式；全局动画。</li></ul>
+</div><div class="modal-actions"><button class="go" id="logClose">关闭</button></div></div></div>
+<div id="barScrim" hidden></div>
+<div id="bar">
+<div id="barBody" hidden>
+<div class="bt" role="tablist"><button data-bt="pr" class="on">价格明细</button><button data-bt="bd">建议出价</button><button data-bt="rt" class="m1">反推表</button></div>
+<div class="bs" id="bsPr"></div>
+<div class="bs" id="bsBd" hidden></div>
+<div class="bs m1" id="bsRt" hidden></div>
+
+</div>
+<button id="barHead" aria-expanded="false" aria-controls="barBody" aria-live="polite"><span>估价 <b id="bE">—</b> 万</span><span>建议出价 <b id="bB">—</b> 万</span></button>
+<button id="barPk" aria-label="展开详情" aria-expanded="false" aria-controls="barBody"><svg class="ic ar"><use href="#i-up"/></svg></button>
+</div>
+<main>
+<header class="top">
+<div><h1>达芙拍卖估价器</h1>
+<p class="sub">估价结果仅供参考。</p></div>
+<div class="corner"><button class="settings-trigger" id="openLog" aria-haspopup="dialog"><svg class="ic"><use href="#i-bell"/></svg> 公告</button><button class="settings-trigger" id="openSettings2" aria-haspopup="dialog"><svg class="ic"><use href="#i-sliders"/></svg> 设置</button></div>
+<div class="tools">
+<span class="seg" role="group" aria-label="主题"><button data-th="light"><svg class="ic"><use href="#i-sun"/></svg>浅色</button><button data-th="dark"><svg class="ic"><use href="#i-moon"/></svg>深色</button><button data-th="auto"><svg class="ic"><use href="#i-auto"/></svg>跟随系统</button></span>
+<span class="seg lay" role="group" aria-label="桌面布局"><button data-ly="0">左输入 · 右报价</button><button data-ly="1">左报价 · 右输入</button></span>
+</div>
+</header>
+
+<div class="cols" id="cols">
+<div class="pane in">
+
+<section class="step">
+<h2>紫金红总数</h2>
+<p class="hint">填写全场紫、金、红藏品总数。</p>
+<div class="st"><button data-k="total" data-d="-1" aria-label="减少"><svg class="ic"><use href="#i-minus"/></svg></button><input id="total" type="number" inputmode="numeric" min="0" placeholder="紫金红总数"><button data-k="total" data-d="1" aria-label="增加"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+</section>
+
+<section class="step">
+<h2>紫件计数器</h2>
+<p class="hint">填写紫件数，自动计算金红数。</p>
+<div class="st"><button data-k="purple" data-d="-1" aria-label="减少"><svg class="ic"><use href="#i-minus"/></svg></button><input id="purple" type="number" inputmode="numeric" min="0" placeholder="紫件计数器"><button data-k="purple" data-d="1" aria-label="增加"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+<button class="rs" data-r="1">重置本局</button>
+</section>
+
+<section class="step">
+<h2>金均仪器（选填）</h2>
+<p class="hint">不填：按固定倍率自动估价；填写读数：自动切换为金均反推，所见大金按原价计入。</p>
+<div class="af"><input id="avg" type="number" inputmode="decimal" min="0" step="any" placeholder="金均（完整数字），如 45321 或 45321.5"></div>
+
+<button class="go m1" id="calc" style="width:100%;margin-top:10px">立即计算</button><p class="am" id="cm"></p>
+</section>
+
+<section class="step">
+<h2><span class="m0">所见大红 / 大金</span><span class="m1">所见大红</span></h2>
+<p class="hint">点选看到的藏品；重复出现时点「＋」。<span class="m1">金藏品请在页面最下方「所见大金」里加入。</span></p>
+<p class="lb">未知红（仓库里看到、但列表里没有的红色产品）</p>
+<div class="ngs" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+  <span>已记录 <b id="unknownRCount">0</b> 件</span>
+  <button class="gb" data-ur="-1" aria-label="减少未知红">−</button>
+  <button class="gb" data-ur="1" aria-label="增加未知红">＋ 添加一件</button>
+  <button class="gb" data-ur="0" aria-label="清空未知红">清空</button>
+</div>
+<p class="hint" style="margin-top:-4px">每添加一件，反推结果都会排除红色件数不足的方案，避免出现“零红”。无需填写价格。</p>
+<p class="lb">已知大红</p><div class="ls" id="listR"></div>
+<p class="lb m0">大金</p><div class="ls m0" id="listG"></div>
+<p class="sm" id="sm"></p>
+<details class="ad"><summary><span class="m0">＋ 添加列表里没有的大红 / 大金</span><span class="m1">＋ 添加列表里没有的大红</span></summary>
+<div class="af"><input id="cn" placeholder="藏品名称" maxlength="12">
+<div class="cc"><button class="r on" data-c="r">大红</button><button class="g m0" data-c="g">大金</button></div>
+<input id="cv" type="number" inputmode="decimal" min="0" placeholder="加成（万）">
+<p class="am" id="am"></p><button class="go" id="go">添加并选中</button></div>
+</details>
+</section>
+
+<section class="step m1"><details class="ad ng"><summary id="gsum"><svg class="ic"><use href="#i-sparkle"/></svg> 所见大金 / 新金藏品（点击展开）</summary>
+<p class="hint" style="margin-top:10px">搜索并加入看到的金藏品；每种最多 3 件，变更后自动重算。</p>
+<p class="lb">已加入的大金</p><ul class="ngs" id="gsel"></ul>
+<div class="af"><input id="gq" placeholder="搜索金藏品：名称或价格，如 大饼 或 4500"></div>
+<ul class="ngs" id="gres"></ul>
+<p class="lb">新增金藏品（价格表里没有的）</p><ul class="ngs" id="ngn"></ul>
+<div class="af"><input id="nn" placeholder="新金藏品名称" maxlength="14"><input id="np" type="number" inputmode="decimal" min="0" step="any" placeholder="价格（完整数字），如 35000"><p class="am" id="nm"></p><button class="go" id="ng">添加新金藏品</button></div>
+<details class="ad"><summary>过往金藏品（内置价格表，点击展开）</summary><ul class="ngs" id="ngo"></ul></details></details></section>
+
+
+
+</div>
+<div class="pane out">
+<section class="res" aria-live="polite">
+<p class="k">最终估价（万）</p>
+<div class="est" id="est">—</div>
+<div class="row"><span>金红数</span><b id="gr">—</b></div>
+<div class="row m1"><span>金总值</span><b id="gv">—</b></div>
+<div class="row m1"><span>红件数 × 倍率</span><b id="rc">—</b></div>
+<div class="row m1"><span>最终估价（完整数字）</span><b id="full">—</b></div>
+<div class="row"><span>金红均价倍率</span><span class="chips" id="chips" style="margin:0"></span></div>
+<div class="row"><span id="bl">金红均价（金红数 × 倍率）</span><b id="base">—</b></div>
+<div class="row"><span>大红 / 大金加成</span><b id="add">0</b></div>
+<div class="row"><span>建议出价（<span id="tn">稳妥</span>）</span><b id="bidv">—</b></div>
+<div class="row"><span>两种倍率对照</span><b id="alt">—</b></div>
+<p class="warn" id="warn"></p>
+<p class="fm" id="fm"></p>
+<p class="fm m1" id="combo"></p>
+</section>
+
+<section class="cd">
+<h2>估价浮动与建议出价</h2>
+<p class="hint">按 ±<span id="fv">—</span> 万展示估价浮动，虚线为建议出价。</p>
+<div class="fl m1"><label for="gf">浮动区间 ±<b id="gfv">10</b> 万</label><input id="gf" class="rg" type="range" min="0" max="60" step="1" value="10"></div>
+<div class="fl m0"><label for="gf0">浮动区间 ±<b id="gf0v">—</b> 万</label><input id="gf0" class="rg" type="range" min="0" max="200" step="1" value="0"></div>
+
+<div id="chart"></div>
+<p class="lb">建议出价（点选一档）</p>
+<div class="tiers" id="tiers"></div>
+<p class="sm" id="bd"></p>
+<p class="hint m1" style="margin-top:8px">金均模式默认浮动 ±10 万，可拖动调整。</p>
+<p class="hint m0" style="margin-top:8px">保守、稳妥、激进出价按浮动区间计算，可拖动滑块调整。</p>
+
+</section>
+
+</div>
+</div>
+<section class="cd m1 rsec"><div class="result-heading"><h2>反推结果表</h2><button class="settings-trigger" id="openSettings" aria-haspopup="dialog" aria-controls="settingsModal"><svg class="ic"><use href="#i-sliders"/></svg> 设置</button></div>
+<p class="hint">方案按估价差值排序，误差保留一位小数。</p>
+<div class="result-panel"><div class="sortbar"><label for="sortMode" class="lb">排序</label>
+<select id="sortMode" style="border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit">
+<option value="price-desc">价格从高到低</option>
+<option value="price-asc">价格从低到高</option>
+<option value="diff-desc">估价差值从高到低</option>
+<option value="diff-asc">估价差值从低到高</option>
+</select></div>
+<div class="rt" id="rtab"></div></div></section>
+
+<button class="rs" data-r="1">重置本局</button>
+<p class="note">倍率与藏品加成仅作估价参考；自定义藏品会保存在本机。</p>
+</main>
+<script>
+const K='dafu-auction-v3';
+const ICO=n=>'<svg class="ic"><use href="#i-'+n+'"/></svg>';
+const openSettings=()=>{const m=$('settingsModal');m.hidden=false;document.body.style.overflow='hidden';};
+const closeSettings=()=>{const m=$('settingsModal');m.hidden=true;document.body.style.overflow='';};
+
+const BASE=[['永恒之心','r',120],['古旧手提箱','r',40],['储钱小哼','r',40],['烟云盏','r',40],['未知门禁卡','r',20],['白龙王','r',20],['曜目权柄','r',10],['酷辣辣辣条','r',10],['一簇幽火','r',10],['九格小食','r',10],['便携式折叠屏','r',10],['永生花环','r',10],['乔望尼金雕像','g',10],['大饼','g',10]];
+const S={total:null,purple:null,mult:8,pick:{},custom:[],cap:200,pct:80,flip:0,tier:1,v:2,mode:0,avg:null,dp:2,gf:10,tl:500,f0:null,newG:[],gpick:{},au:1,sortMode:'diff-asc',inferSeconds:3,minGoldCount:1,unknownR:0,zeroLimit:0,errLimit:0};
+let cc='r';
+try{const o=JSON.parse(localStorage.getItem(K)||'{}');
+ if(Number.isInteger(o.total)&&o.total>=0)S.total=o.total;
+ if(Number.isInteger(o.purple)&&o.purple>=0)S.purple=o.purple;
+ if(o.mult===10)S.mult=10;
+ if(['price-desc','price-asc','diff-desc','diff-asc'].includes(o.sortMode))S.sortMode=o.sortMode;
+  if([3,5,8,10,15].includes(o.inferSeconds))S.inferSeconds=o.inferSeconds;
+  if(Number.isInteger(o.minGoldCount)&&o.minGoldCount>=1&&o.minGoldCount<=10)S.minGoldCount=o.minGoldCount;
+  if(Number.isInteger(o.unknownR)&&o.unknownR>=0&&o.unknownR<=99)S.unknownR=o.unknownR;
+   const LM=[0,3,5,8,10,15,20,30,50,100,300];if(LM.includes(o.zeroLimit))S.zeroLimit=o.zeroLimit;if(LM.includes(o.errLimit))S.errLimit=o.errLimit;
+ if(o.v===2&&Number.isInteger(o.cap)&&o.cap>=0)S.cap=o.cap;
+ if(Number.isInteger(o.pct)&&o.pct>=0)S.pct=o.pct;
+ if(o.flip===1)S.flip=1;
+ if([0,1,2].includes(o.tier))S.tier=o.tier;
+ if(o.mode===1)S.mode=1;
+ if(o.au===1&&typeof o.avg==="number"&&o.avg>=0)S.avg=o.avg;
+ if(o.gpick&&typeof o.gpick==="object")Object.keys(o.gpick).forEach(k=>{const q=o.gpick[k];if(Number.isInteger(q)&&q>0)S.gpick[k]=Math.min(q,3)});
+ if(Number.isInteger(o.dp)&&o.dp>=2&&o.dp<=4)S.dp=o.dp;
+ if(Number.isInteger(o.gf)&&o.gf>=0&&o.gf<=60)S.gf=o.gf;
+
+  if(Number.isInteger(o.f0)&&o.f0>=0&&o.f0<=200)S.f0=o.f0;
+ if(Array.isArray(o.newG))S.newG=o.newG.filter(c=>Array.isArray(c)&&typeof c[0]==="string"&&Number.isFinite(c[1])&&c[1]>0);
+ if(Array.isArray(o.pick))o.pick.forEach(x=>{if(typeof x==='string')S.pick[x]=1});
+ else if(o.pick&&typeof o.pick==='object')Object.keys(o.pick).forEach(k=>{const q=o.pick[k];if(Number.isInteger(q)&&q>0)S.pick[k]=Math.min(q,99)});
+ if(Array.isArray(o.custom))S.custom=o.custom.filter(c=>Array.isArray(c)&&typeof c[0]==='string'&&(c[1]==='r'||c[1]==='g')&&Number.isFinite(c[2]));}catch(e){}
+const $=id=>document.getElementById(id);
+const num=v=>{const x=parseInt(v,10);return Number.isFinite(x)&&x>=0?x:null};
+const all=()=>BASE.concat(S.custom);
+const Q=n=>Object.prototype.hasOwnProperty.call(S.pick,n)?S.pick[n]:0;
+const esc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
+function tile(i){const q=Q(i[0]),cu=S.custom.includes(i),n=esc(i[0]);
+ return '<div class="it '+i[1]+(q?' on':'')+'"><button class="tg" data-n="'+n+'"><b>'+n+'</b><span>加'+i[2]+'w'+(q>1?' × '+q:'')+'</span></button>'+(q?'<div class="qt"><button data-n="'+n+'" data-q="-1" aria-label="减少数量">'+ICO('minus')+'</button><b>'+q+'</b><button data-n="'+n+'" data-q="1" aria-label="增加数量">'+ICO('plus')+'</button></div>':'')+(cu?'<button class="del" data-x="'+n+'" aria-label="删除">'+ICO('x')+'</button>':'')+'</div>'}
+function drawItems(){const ls=all();
+ [['listR','r'],['listG','g']].forEach(p=>{$(p[0]).innerHTML=ls.filter(i=>i[1]===p[1]).sort((a,b)=>b[2]-a[2]).map(tile).join('')})}
+const TK='dafu-theme';
+let T='auto';
+try{const t=localStorage.getItem(TK);if(t==='light'||t==='dark')T=t}catch(e){}
+function theme(t){T=t;const r=document.documentElement;if(t==='auto')r.removeAttribute('data-theme');else r.dataset.theme=t;try{localStorage.setItem(TK,t)}catch(e){}}
+function ui(){
+ $('cols').classList.toggle('sw',S.flip===1);
+ document.body.classList.toggle('mode1',S.mode===1);
+ document.querySelectorAll('[data-md]').forEach(b=>{const on=+b.dataset.md===S.mode;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+ document.querySelectorAll('[data-th]').forEach(b=>{const on=b.dataset.th===T;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+ document.querySelectorAll('[data-ly]').forEach(b=>{const on=+b.dataset.ly===S.flip;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)});
+}
+const PR=[['乔望尼金雕像',271827],['大饼',202798],['罐装随心泥',124816],['金龙鱼',111111],['赤色来电',101554],['条纹椰',101537],['琉璃尾',101403],['片刻驻足',88888],['双颈玉瓶-白',80754],['名为显赫的权杖',77777],['映像机',76591],['青花花瓶',62456],['澄空之眼',60285],['算力面包',60040],['万有星仪',51077],['灿金环',38316],['巡哨-干练精英',37558],['莓果总汇奶油长棍面包',30452],['浅绯祈手办',30264],['海盐心迷宫',30211],['「强身好伙伴！」',27246],['轮椅模型',27159],['絮语之种',22336],['心猎铁骑L3-以当千',22297],['万花筒',21012],['缠枝花纹筷',20238],['凝华海露',19926],['「截云」',18288],['名为尊贵的冠冕',18193],['万能适配器',18031],['生春鞘',15309],['蓝焰火花塞',15108],['盈雪点翠',15037],['气象指南',15024],['黄釉雅器',13632],['骑士车贴',12164],['「方盒科技」电容笔',12116],['「方盒科技」充电宝',11981],['自由数据线',11974],['绯红宝石',9938],['猫丸秘制豚骨拉面',9040],['桂冠',7648],['大满贯手握',7610],['缄默花瓣',7547],['「方盒科技」智能手表',7500],['海星',5555],['第23页',5047],['光之方',5041],['落日珍珠',4975],['心猎铁骑L1-必杀一击',22847],['心猎铁骑L2-闪焰冲锋',22770]];
+const AP=()=>PR.concat(S.newG);let RES=null,SEL=-1;
+function mkRnd(seed){let x=seed>>>0;return()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296}}
+// 反推：每种金品最多叠加 3 件、至少 2 种金品组合、已加入的大金按原价固定计入；单位均为完整数字
+const BIG=150000;
+function tables(P,LO,HI,cap){
+ const m=P.length,MX=[],MN=[];
+ for(let i=m;i>=0;i--){
+  MX[i]=new Array(cap+1).fill(-Infinity);MN[i]=new Array(cap+1).fill(Infinity);
+  if(i===m){MX[i][0]=0;MN[i][0]=0;continue}
+  for(let r=0;r<=cap;r++)for(let c=LO[i];c<=HI[i]&&c<=r;c++){
+   const hi=MX[i+1][r-c],lo=MN[i+1][r-c];
+   if(hi>-Infinity&&hi+P[i]*c>MX[i][r])MX[i][r]=hi+P[i]*c;
+   if(lo<Infinity&&lo+P[i]*c<MN[i][r])MN[i][r]=lo+P[i]*c;
+  }
+ }
+ return [MX,MN];
+}
+let INFER_DEADLINE=Infinity;
+function pass(gr,A,P,ID,LO,HI,seed){
+ const m=P.length,cap=Math.min(gr-(S.unknownR||0),60),F=LO.reduce((a,b)=>a+b,0),n0=Math.max(F,cap>=2?2:1,S.minGoldCount||1),tb=tables(P,LO,HI,Math.max(0,cap)),MX=tb[0],MN=tb[1],
+  rnd=mkRnd(20261022+seed),t0=performance.now(),per=[],WL=[0,20,100,500,3000,10000,30000,50000,100000,300000,Infinity];let found=false,zc=0,ec=0;const ZT=S.zeroLimit||Infinity,ET=S.errLimit||Infinity,PN=Math.min(400,Math.max(10,(S.zeroLimit||400)+(S.errLimit||400))),NC=PN>10?250000:8000;
+ for(let n=n0;n<=cap&&performance.now()<INFER_DEADLINE&&(zc<ZT||ec<ET);n++){
+  const T=n*A,sols=[],seen=new Set(),cnt=new Array(m).fill(0),dl=t0+(S.inferSeconds||5)*900*(n-n0+1)/Math.max(1,cap-n0+1);
+  let nodes=0,w=0;
+  const rec=(i,r,sum)=>{
+   if(sols.length>=PN||nodes>NC||performance.now()>=INFER_DEADLINE)return;
+   if(sum+MX[i][r]<T-w||sum+MN[i][r]>T+w)return;
+   if(r===0){
+    let k=0,key='';for(let x=0;x<m;x++)if(cnt[x]){k++;key+=x+':'+cnt[x]+','}
+    const e=sum-T;
+    if(k>=2&&n>=(S.minGoldCount||1)&&Math.abs(e)<=w&&!seen.has(key)){seen.add(key);const c=[];for(let x=0;x<m;x++)for(let z=0;z<cnt[x];z++)c.push(ID[x]);sols.push({n:n,k:k,e:e,sum:sum,c:c,key:n+'|'+key})}
+    return;
+   }
+   if(i>=m)return;
+   if(++nodes%128===0&&found&&performance.now()>dl)nodes=1e9;
+   const o=[];for(let c=LO[i];c<=HI[i]&&c<=r;c++)o.push(c);
+   for(let x=o.length-1;x>0;x--){const y=Math.floor(rnd()*(x+1)),t=o[x];o[x]=o[y];o[y]=t}
+   for(const c of o){cnt[i]=c;rec(i+1,r-c,sum+P[i]*c)}
+   cnt[i]=0;
+  };
+  for(const wa of WL){if(performance.now()>=INFER_DEADLINE||(found&&performance.now()>dl))break;w=n*wa;nodes=0;rec(0,n,0);if(sols.length&&(sols.length>=PN||wa>=3000))break}
+  if(sols.length)found=true;
+  zc+=sols.filter(r=>r.e===0).length;ec+=sols.filter(r=>r.e!==0).length;
+  per.push(sols);
+ }
+ return per;
+}
+const gsig=()=>Object.keys(S.gpick).sort().map(k=>k+'*'+S.gpick[k]).join(',');
+const rkey=(gr,A)=>gr+'|'+A+'|'+AP().length+'|'+gsig()+'|UR'+S.unknownR;
+// 套用「均价计算器」的规则：组合均价 = 总价 ÷ 件数，与读数比较，相差最小的排前面，相差一样则件数少的在前
+function infer(gr,A){
+ INFER_DEADLINE=performance.now()+(S.inferSeconds||5)*1000;
+ const L=AP(),srt=L.map((x,i)=>[x[1],i]).sort((a,b)=>b[0]-a[0]),P=srt.map(x=>x[0]),ID=srt.map(x=>x[1]);
+ const LO=ID.map(j=>Math.min(3,S.gpick[L[j][0]]||0)),F=LO.reduce((a,b)=>a+b,0),cap=Math.min(gr-(S.unknownR||0),60);
+ if(F>cap)return {c:[],ex:false,L:L,A:A,key:rkey(gr,A),msg:'已加入的大金或未知红数量与金红数冲突，请核对。'};
+ if(cap<Math.max(F,S.minGoldCount||1,1))return {c:[],ex:false,L:L,A:A,key:rkey(gr,A),msg:'未知红已记录 '+S.unknownR+' 件，但可用金红数不足以组成符合条件的方案，请核对数量。'};
+ const H=b=>LO.map((lo,x)=>Math.max(lo,P[x]>=BIG?b:3));
+ let per=pass(gr,A,P,ID,LO,H(0),0);
+ const tot=per.reduce((a,l)=>a+l.length,0);
+ if(tot<4){
+  const p2=pass(gr,A,P,ID,LO,H(1),7);
+  per=p2.map((l,i)=>{const have=new Set((per[i]||[]).map(r=>r.key));return (per[i]||[]).concat(l.filter(r=>!have.has(r.key)))});
+ }
+ const ae=r=>Math.abs(r.e)/r.n,cmp=(a,b)=>ae(a)-ae(b)||a.n-b.n,best=[],rest=[];
+ per.forEach(l=>{l.sort(cmp);if(l[0])best.push(l[0]);for(let i=1;i<l.length;i++)rest.push(l[i])});
+ best.sort(cmp);rest.sort(cmp);
+ const c=best.concat(rest);
+ c.sort(cmp);c.forEach((r,i)=>{r.id=i});
+ return {c:c,ex:c.length>0,zeroFound:c.some(r=>r.e===0),L:L,A:A,key:rkey(gr,A),msg:c.some(r=>r.e===0)?'已找到总差为 0 的精确方案，已优先排在前面。':'本次限时搜索未找到总差为 0 的精确方案；以下为已找到的近似方案。'};
+}
+let AT=0;
+function autoCalc(now){
+ clearTimeout(AT);
+ if(S.mode!==1)return;
+ const gr=(S.total!==null&&S.purple!==null)?S.total-S.purple:null;
+ if(gr===null||gr<1||S.avg===null)return;
+ $('cm').textContent='计算中…';
+ AT=setTimeout(()=>{const o=runCalc();$('cm').textContent=typeof o==='string'?o:'';update()},now?0:350);
+}
+function runCalc(){
+ const gr=(S.total!==null&&S.purple!==null)?S.total-S.purple:null;
+ if(gr===null||gr<1||S.avg===null){RES=null;return false}
+ RES=infer(gr,S.avg);SEL=-1;return RES.msg||true;
+}
+const rng=a=>{const o=[];let i=0;while(i<a.length){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(j>i?a[i]+'–'+a[j]:''+a[i]);i=j+1}return o.join('、')};
+function drawRes(rows,gr,add,m){
+ if(!rows.length){$('rtab').innerHTML='<p class="hint">'+(RES?(RES.msg||'暂时没有可用的组合，请核对金红数和金均读数。'):'填好读数后点「开始计算」，这里会列出多种反推方案。')+'</p>';return}
+ const L=RES.L,A=RES.A,raw=r=>r.sum/10000+(gr-r.n)*m+add,sg=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(1);
+ const zeros=rows.filter(r=>r.e===0),others=rows.filter(r=>r.e!==0),baseRows=zeros.length?zeros:rows;
+ const avgE=Math.round(baseRows.reduce((a,r)=>a+raw(r),0)/baseRows.length),avgF=Math.round(baseRows.reduce((a,r)=>a+raw(r),0)/baseRows.length*10000);
+ const useMap=L.map((x)=>({name:x[0],price:x[1],schemes:0,items:0}));
+ rows.forEach(r=>{const ct={};r.c.forEach(j=>{ct[j]=(ct[j]||0)+1});Object.keys(ct).forEach(j=>{if(useMap[j]){useMap[j].schemes++;useMap[j].items+=ct[j]}})});
+ const used=useMap.filter(x=>x.schemes>0).length,totalItems=useMap.reduce((a,x)=>a+x.items,0);
+ const pct=v=>rows.length?(v/rows.length*100).toFixed(0)+'%':'0%',coverage=useMap.length?(used/useMap.length*100).toFixed(0)+'%':'0%';
+ let h='<div class="hint" style="padding:6px 9px;margin:4px 0;border-radius:7px;">'+(zeros.length?ICO('check')+' 共找到 '+zeros.length+' 个零误差子组合；总价值估算默认按这些零差组合计算。':ICO('info')+' 本次限时搜索未找到总差为 0 的方案；总价值估算暂按当前推算方案平均值计算。')+'</div>'+
+ '<button class="rw ravg'+(SEL<0?' on':'')+'" data-s="-1"><b>默认总价值估算：'+avgE+' 万</b>（≈ '+avgF+'）<small>'+(zeros.length?'按全部 '+zeros.length+' 个零误差子组合取平均':'按 '+rows.length+' 组近似方案取平均')+'；点选下方任一方案可切换估算依据</small></button><div class="rscroll">';
+ function comboButton(r,label,i){
+  const ct={};r.c.forEach(j=>{ct[j]=(ct[j]||0)+1});const av=r.sum/r.n;
+  const names=Object.keys(ct).sort((a,b)=>L[b][1]-L[a][1]).map(j=>esc(L[j][0])+' '+L[j][1]+(ct[j]>1?' ×'+ct[j]:'')+(S.gpick[L[j][0]]?'（已加入）':'')).join(' + ');
+  return '<button class="rw'+(SEL===r.id?' on':'')+'" data-s="'+r.id+'"><b>'+label+' · 估价 '+Math.round(raw(r))+' 万</b>（完整 '+Math.round(raw(r)*10000)+'）　金 '+r.n+' 件 · 红 '+(gr-r.n)+' 件<small>'+names+'<br>总价 '+r.sum+' ÷ '+r.n+' 件 = 组合均价 '+av.toFixed(1)+'；读数 '+A+'；误差 '+sg(av-A)+'（总差 '+sg(r.sum-r.n*A)+'）</small></button>';
+ }
+ if(zeros.length){
+  const ZL=S.zeroLimit||0,zs=ZL?zeros.slice(0,ZL):zeros,zr=zs.slice(3);h+='<div class="gh z">零误差方案（共 '+zeros.length+' 个'+(zs.length<zeros.length?'，按设置显示 '+zs.length:'')+'）</div><p class="schemehint">总差均为 0；总价值默认按全部零误差组合取平均。点选可切换估价依据。</p><div class="zgroup">'+zs.slice(0,3).map((r,i)=>comboButton(r,'子组合 '+(i+1),i)).join('')+'</div>'+(zr.length?'<details class="more"><summary>展开其余 '+zr.length+' 个零误差子组合</summary><div class="subcombo">'+zr.map((r,i)=>comboButton(r,'子组合 '+(i+4),i+3)).join('')+'</div></details>':'');
+ }
+ const EL=S.errLimit||0,os=EL?others.slice(0,EL):others;if(os.length)h+=(zeros.length?'<div class="sep"></div>':'')+'<div class="gh e">带误差方案（共 '+others.length+' 个'+(os.length<others.length?'，按设置显示 '+os.length:'')+'）</div>';os.forEach((r,i)=>{
+  const hue=Math.round(120*(1-(os.length<=1?0:i/(os.length-1))));
+  h+='<div class="scheme" style="border-left:4px solid hsl('+hue+',75%,42%)"><div style="font-weight:700;font-size:13px;line-height:1.45;padding:4px 2px">带误差 '+(i+1)+' · 估价 '+Math.round(raw(r))+' 万 · 总差 '+sg(r.e)+'</div><div class="subcombo">'+comboButton(r,'查看 / 选用此方案',i)+'</div></div>';
+ });
+ // 利用率表格放到所有方案的最后，避免影响主要估价流程
+ h+='<section class="utilbox"><div class="utiltitle">'+ICO('chart')+' 金品利用率（基于当前找到的 '+rows.length+' 种方案）</div><div class="utilsummary"><div class="utilmetric"><b>'+used+'/'+useMap.length+'</b><span>被用到的金品</span></div><div class="utilmetric"><b>'+coverage+'</b><span>金品覆盖率</span></div><div class="utilmetric"><b>'+totalItems+'</b><span>方案中金品总件次</span></div></div><div class="utilhead"><span>金品名称 / 价格</span><span style="text-align:right">出现方案</span><span style="text-align:right">件次</span><span style="text-align:right">使用率</span></div><div class="utilrows">'+
+ useMap.slice().sort((a,b)=>b.schemes-a.schemes||b.items-a.items||b.price-a.price).map(x=>'<div class="utilrow"><span class="un">'+esc(x.name)+'<br><span style="color:var(--mu)">'+x.price+'</span><div class="utilbar"><i style="width:'+pct(x.schemes)+'"></i></div></span><span class="num">'+x.schemes+'/'+rows.length+'</span><span class="num">'+x.items+'</span><span class="num">'+pct(x.schemes)+'</span></div>').join('')+'</div><p class="utilnote">使用率 = 含有该金品的方案数 ÷ 当前显示方案数；件次为这些方案里该金品出现的总次数。未出现不代表数学上无解，结果受限时搜索影响。</p></section>';
+ h+='</div>';
+ $('rtab').innerHTML=h; const sm=$('sortMode');if(sm)sm.value=S.sortMode;const it=$('inferSeconds');if(it)it.value=String(S.inferSeconds||5);const mg=$('minGoldCount');if(mg)mg.value=String(S.minGoldCount||1);
+}
+function drawNG(){
+ $('ngn').innerHTML=S.newG.length?S.newG.map((x,i)=>'<li>'+esc(x[0])+' '+x[1]+' <button data-g="'+i+'" aria-label="删除" style="border:0;background:none;color:var(--mu);cursor:pointer">×</button></li>').join(''):'<li>暂无</li>';
+ if(!$('ngo').firstChild)$('ngo').innerHTML=PR.map(x=>'<li>'+esc(x[0])+' '+x[1]+'</li>').join('');
+ const L=AP(),sel=Object.keys(S.gpick).filter(k=>L.some(x=>x[0]===k));
+ Object.keys(S.gpick).forEach(k=>{if(!sel.includes(k))delete S.gpick[k]});
+ $('gsel').innerHTML=sel.length?sel.map(k=>{const it=L.find(x=>x[0]===k),n=esc(k);return '<li class="on">'+n+' '+it[1]+' <button class="gb" data-gn="'+n+'" data-gd="-1" aria-label="减少">'+ICO('minus')+'</button><b>'+S.gpick[k]+'</b><button class="gb" data-gn="'+n+'" data-gd="1" aria-label="增加">'+ICO('plus')+'</button><button class="gb" data-gn="'+n+'" data-gx="1" aria-label="移除">'+ICO('x')+'</button></li>'}).join(''):'<li>还没有加入</li>';
+ const cn=sel.reduce((a,k)=>a+S.gpick[k],0);
+ $('gsum').innerHTML=ICO('sparkle')+' 所见大金 / 新金藏品（已加入 '+cn+' 件，点击展开）';
+ drawGoldRes();
+}
+function drawGoldRes(){
+ const q=$('gq').value.trim().toLowerCase(),box=$('gres');
+ if(!q){box.innerHTML='<li>输入名称或价格后，这里显示匹配的金藏品</li>';return}
+ const dig=/^\d+$/.test(q),dec=/^\d*\.\d+$/.test(q)?parseFloat(q):null;
+ const hit=AP().filter(x=>!S.gpick[x[0]]&&(x[0].toLowerCase().includes(q)||(dig&&String(x[1]).includes(q))||(dec!==null&&Math.abs(x[1]/10000-dec)<.05))).sort((a,b)=>b[1]-a[1]).slice(0,12);
+ box.innerHTML=hit.length?hit.map(x=>'<li><button class="gadd" data-ga="'+esc(x[0])+'">＋ '+esc(x[0])+' '+x[1]+'</button></li>').join(''):'<li>没有匹配的金藏品，可在下方新增</li>';
+}
+function addNG(){
+ const n=$('nn').value.trim(),v=parseFloat($('np').value),p=Math.round(v),K=t=>t.replace(/\s/g,'').toLowerCase();
+ if(!n||!Number.isFinite(v)||v<=0){$('nm').textContent='请填写名称和价格（完整数字）。';return}
+ const d=AP().find(x=>K(x[0])===K(n));
+ if(d){$('nm').textContent='重复：「'+d[0]+'」已在'+(PR.includes(d)?'过往':'新增')+'金藏品里。';return}
+ const q=AP().find(x=>x[1]===p);
+ if(q){$('nm').textContent='价格与「'+q[0]+'」完全相同，疑似重复，请核对。';return}
+ S.newG.push([n,p]);if(S.mode===1)runCalc();$('nn').value='';$('np').value='';$('nm').textContent='';save();update();
+}
+function update(){
+ ui();
+ const m1=S.mode===1;
+ const pk=all().filter(i=>Q(i[0])>0&&(!m1||i[1]==='r'));
+ const add=pk.reduce((s,i)=>s+i[2]*Q(i[0]),0),cnt=pk.reduce((s,i)=>s+Q(i[0]),0);
+ $('unknownRCount').textContent=S.unknownR||0;
+ $('sm').textContent=cnt?'已选 '+cnt+' 件：'+pk.map(i=>i[0]+(Q(i[0])>1?'×'+Q(i[0]):'')).join('、')+'，合计加 '+add+' 万':(m1?'还没选，看到大红就点一下。':'还没选，看到大红或大金就点一下。');
+ const gr=(S.total!==null&&S.purple!==null)?S.total-S.purple:null;
+ const bad=gr!==null&&gr<0,ok=gr!==null&&!bad,m=S.mult,A=S.avg;
+ if(RES&&RES.key!==rkey(gr,A))RES=null;
+ const raw=r=>r.sum/10000+(gr-r.n)*m+add;
+ const sortRows=(a,b)=>{
+  if(S.sortMode==='price-asc')return raw(a)-raw(b)||a.id-b.id;
+  if(S.sortMode==='diff-desc')return Math.abs(b.sum-b.n*A)-Math.abs(a.sum-a.n*A)||raw(b)-raw(a)||a.id-b.id;
+  if(S.sortMode==='diff-asc')return Math.abs(a.sum-a.n*A)-Math.abs(b.sum-b.n*A)||raw(b)-raw(a)||a.id-b.id;
+  return raw(b)-raw(a)||a.id-b.id;
+ };
+ const rows=m1&&RES?RES.c.slice().sort(sortRows):[];
+ if(SEL>=0&&!rows.some(r=>r.id===SEL))SEL=-1;
+ const v1=ok&&(!m1||rows.length>0),R=Math.round;
+ let G=0,Rn=0;
+ if(rows.length){const z=rows.filter(r=>r.e===0),q=SEL>=0?[rows.find(r=>r.id===SEL)]: (z.length?z:rows);G=q.reduce((a,r)=>a+r.sum/10000,0)/q.length;Rn=q.reduce((a,r)=>a+gr-r.n,0)/q.length}
+ const calc=x=>m1?G+Rn*x:gr*x;
+ const base=v1?calc(m):null,E=v1?Math.round(base+add):null,w=[];
+ if(bad)w.push('紫件数大于紫金红总数，请检查两个读数。');
+ if(m1&&A!==null&&A<25000)w.push('金均低于 25000：严禁激进，出价已降一档。');
+ if(m1&&A!==null&&A>70000)w.push('金均高于 70000：红的预估可以抬高，可试 ×10。');
+ $('warn').textContent=w.join(' ');
+ $('gr').textContent=ok?gr:'—';
+ $('bl').textContent=m1?'金总值 + 红总值（'+(SEL>=0?'所选方案':(rows.some(r=>r.e===0)?'零差方案平均':'方案平均'))+'）':'金红均价（金红数 × 倍率）';
+ $('gv').textContent=v1&&m1?G.toFixed(2)+' 万':'—';
+ $('rc').textContent=v1&&m1?+Rn.toFixed(1)+' 件 × '+m+' = '+(Rn*m).toFixed(2)+' 万':'—';
+ $('full').textContent=v1&&m1?String(Math.round((base+add)*10000)):'—';
+ $('base').textContent=v1?(m1?base.toFixed(2):R(base))+' 万':'—';
+ $('add').textContent=add+' 万';
+ $('est').textContent=v1?E:'—';
+ $('alt').textContent=v1?'×8 → '+Math.round(calc(8)+add)+'　×10 → '+Math.round(calc(10)+add):'—';
+ $('fm').textContent=v1?(m1?'金总值 '+G.toFixed(2)+'；红 '+(+Rn.toFixed(1))+' × '+m+' = '+(Rn*m).toFixed(2)+'；加成 '+add+'；估价 '+E+' 万（完整 '+Math.round((base+add)*10000)+'）':'金红数 '+gr+'（'+S.total+' − '+S.purple+'）；金红均价 '+gr+' × '+m+' = '+base+'；加成 '+add+'；估价 '+base+' + '+add+' = '+E+'（万）'):(m1?'填完紫金红总数、紫件计数器和金均后，点「开始计算」。':'填完紫金红总数和紫件计数器后自动计算，所选大红 / 大金的加成会一起加上。');
+ $('combo').textContent=rows.length?'金均反推：共 '+rows.length+' 种方案，当前按'+({'price-desc':'估价从高到低','price-asc':'估价从低到高','diff-desc':'估价差值从高到低','diff-asc':'估价差值从低到高'}[S.sortMode]||'估价从高到低')+'排列，误差已标在每条里，见页面下方结果表，可点选一条作为最终估价。':'';
+ $('chips').innerHTML=[8,10].map(x=>'<button class="chip'+(m===x?' on':'')+'" data-m="'+x+'">×'+x+'</button>').join('');
+ drawItems();drawRes(rows,gr,add,m);drawNG();
+ drawFluct(E);
+ if(BO)fillBar();
+}
+const TN=['保守','稳妥','激进'];
+function drawFluct(E){
+ const m1=S.mode===1;
+ const F=E===null?0:m1?S.gf:Math.min(E,S.f0===null?Math.min(200,Math.round(E*.8)):S.f0),h=Math.round(F/2);
+ const low=m1&&S.avg!==null&&S.avg<25000,ti=low?Math.max(0,S.tier-1):S.tier;
+ $('tn').textContent=TN[ti];$('fv').textContent=E===null?'—':F;$('gfv').textContent=S.gf;$('gf0').value=F;$('gf0v').textContent=E===null?'—':F;
+ if(E===null){$('bidv').textContent='—';$('bE').textContent='—';$('bB').textContent='—';$('chart').innerHTML='<p class="hint">填完所需读数后显示。</p>';$('tiers').innerHTML='';$('bd').textContent='';return}
+ const bids=[E-F,E-h,E],bid=bids[ti];
+ const N=m1?9:5,mid=(N-1)/2,pts=[];
+ for(let i=0;i<N;i++){const o=i===mid?0:(i<mid?-1:1)*Math.round(F*Math.abs(i-mid)/mid);pts.push([o,E+o])}
+ const hi=E+F,b=hi*1.12||1,st=294/N,X=i=>42+st*(i+.5),bw=Math.min(40,st*.66),Y=v=>Math.round((160-v/b*126)*10)/10,fs=N>5?' style="font-size:10px"':'';
+ let s='<svg viewBox="0 0 340 200" role="img" aria-label="估价浮动条形图">';
+ [0,b/2,b].forEach(v=>{s+='<line class="cg" x1="42" x2="336" y1="'+Y(v)+'" y2="'+Y(v)+'"/><text class="ct" x="38" y="'+(Y(v)+4)+'" text-anchor="end">'+Math.round(v)+'</text>'});
+ pts.forEach((p,i)=>{const v=p[1],y=Y(v),c=i===mid,k=c?'be':p[0]>0?'bu':'bd',f=c?'':fs;
+  s+='<rect class="'+k+'" x="'+(X(i)-bw/2)+'" y="'+y+'" width="'+bw+'" height="'+Math.max(0,160-y)+'" rx="4"/><text class="'+(c?'cev':'cv')+'"'+f+' x="'+X(i)+'" y="'+(y-7)+'" text-anchor="middle">'+v+'</text><text class="'+(c?'cex':'ct')+'"'+f+' x="'+X(i)+'" y="182" text-anchor="middle">'+(c?(N>5?'当前':'当前估价'):N>5?(p[0]>0?'+':'')+p[0]:p[0]>0?'溢出 '+p[0]:'贬值 '+(-p[0]))+'</text>'});
+ s+='<line class="cb" x1="42" x2="336" y1="'+Y(bid)+'" y2="'+Y(bid)+'"/><line class="cb" x1="42" x2="62" y1="13" y2="13"/><text class="ctb" x="68" y="17">建议出价 '+bid+'</text><rect class="be" x="190" y="6" width="13" height="13" rx="3"/><text class="cex" x="208" y="17">当前估价 '+E+'</text>';
+ $('chart').innerHTML=s+'</svg>';
+ $('bidv').textContent=bid+' 万';$('bE').textContent=E;$('bB').textContent=bid;
+ $('tiers').innerHTML=bids.map((v,i)=>'<button class="tr'+(i===S.tier?' on':'')+'" data-t="'+i+'"><b>'+TN[i]+'</b><span>'+v+' 万</span></button>').join('');
+ const r=v=>v>=0?'赚 '+v:'亏 '+(-v);
+ $('bd').textContent='按'+TN[ti]+'出价 '+bid+' 万：贬值到 '+(E-F)+' 时'+r(E-F-bid)+'，估价 '+E+' 时'+r(E-bid)+'，溢出到 '+(E+F)+' 时'+r(E+F-bid)+'（万）。';
+}
+function sync(){$('total').value=S.total===null?'':S.total;$('purple').value=S.purple===null?'':S.purple;$('avg').value=S.avg===null?'':S.avg;$('gf').value=S.gf;update()}
+function addItem(){
+ const n=$('cn').value.trim(),v=parseFloat($('cv').value);
+ if(!n||!Number.isFinite(v)||v<0){$('am').textContent='请填写名称和加成（万）。';return}
+ if(all().some(i=>i[0]===n)){$('am').textContent='这件已经在列表里了，直接点选即可。';return}
+ S.custom.push([n,S.mode===1?'r':cc,Math.round(v)]);S.pick[n]=1;
+ $('cn').value='';$('cv').value='';$('am').textContent='';save();update();
+}
+['total','purple'].forEach(k=>$(k).addEventListener('input',e=>{S[k]=num(e.target.value);save();update();autoCalc()}));
+$('gf0').addEventListener('input',e=>{S.f0=+e.target.value;save();update()});
+$('sortMode').addEventListener('change',e=>{S.sortMode=['price-desc','price-asc','diff-desc','diff-asc'].includes(e.target.value)?e.target.value:'diff-asc';save();update()});
+$('inferSeconds').addEventListener('change',e=>{S.inferSeconds=[3,5,8,10,15].includes(+e.target.value)?+e.target.value:5;save()});
+
+$('openSettings').addEventListener('click',()=>{const it=$('inferSeconds');const mg=$('minGoldCount');if(it)it.value=String(S.inferSeconds||5);if(mg)mg.value=String(S.minGoldCount||1);openSettings()});
+$('settingsClose').addEventListener('click',closeSettings);
+$('settingsModal').addEventListener('click',e=>{if(e.target===$('settingsModal'))closeSettings()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('settingsModal').hidden)closeSettings()});
+
+$('minGoldCount').addEventListener('change',e=>{S.minGoldCount=Math.max(1,Math.min(10,parseInt(e.target.value,10)||1));save();if(S.mode===1&&S.avg!==null)runCalc();else update()});
+$('avg').addEventListener('input',e=>{const x=parseFloat(e.target.value);S.avg=Number.isFinite(x)&&x>=0?x:null;save();update();autoCalc()});
+$('gq').addEventListener('input',drawGoldRes);
+$('gf').addEventListener('input',e=>{S.gf=+e.target.value;save();update()});
+document.addEventListener('click',e=>{
+ const t=e.target.closest('button');if(!t)return;
+ let auto=false;
+ const d=t.dataset;
+ if(d.k){S[d.k]=Math.max(0,(S[d.k]||0)+parseInt(d.d,10));$(d.k).value=S[d.k];auto=true;}
+ else if(d.n!==undefined){if(d.q){const q=Q(d.n)+parseInt(d.q,10);if(q>0)S.pick[d.n]=Math.min(q,99);else delete S.pick[d.n];}else if(Q(d.n))delete S.pick[d.n];else S.pick[d.n]=1;}
+ else if(d.x!==undefined){S.custom=S.custom.filter(c=>c[0]!==d.x);delete S.pick[d.x];}
+ else if(d.m){S.mult=+d.m;}
+ else if(d.th){theme(d.th);}
+ else if(d.md!==undefined){S.mode=+d.md;auto=true;}
+ else if(d.ly!==undefined){S.flip=+d.ly;}
+ else if(d.t!==undefined){S.tier=+d.t;}
+ else if(d.c){cc=d.c;document.querySelectorAll('.cc button').forEach(b=>b.classList.toggle('on',b.dataset.c===cc));return;}
+ else if(t.id==='nok'){try{localStorage.setItem('dafu-notice','1')}catch(x){}$('notice').hidden=true;return}
+ else if(t.id==='go'){addItem();return}
+ else if(t.id==='ng'){addNG();return}
+ else if(t.id==='calc'){t.textContent='计算中…';t.disabled=true;setTimeout(()=>{const o=runCalc();t.disabled=false;t.textContent='立即计算';$('cm').textContent=o===true?'':(typeof o==='string'?o:'请先填好紫金红总数、紫件计数器（金红数至少为 1）和金均。');update()},30);return}
+ else if(d.s!==undefined){SEL=+d.s}
+ else if(d.g!==undefined){const g=S.newG[+d.g];if(g)delete S.gpick[g[0]];S.newG.splice(+d.g,1);auto=true}
+ else if(d.ga!==undefined){if(!S.gpick[d.ga])S.gpick[d.ga]=1;auto=true}
+ else if(d.gx!==undefined){delete S.gpick[d.gn];auto=true}
+ else if(d.gd!==undefined){const q=(S.gpick[d.gn]||0)+parseInt(d.gd,10);if(q>0)S.gpick[d.gn]=Math.min(q,3);else delete S.gpick[d.gn];auto=true}
+ else if(d.ur!==undefined){S.unknownR=d.ur==='0'?0:Math.max(0,Math.min(99,(S.unknownR||0)+parseInt(d.ur,10)));auto=true}
+ else if(d.r!==undefined){clearTimeout(AT);S.total=null;S.purple=null;S.pick={};S.gpick={};S.unknownR=0;S.mult=8;S.avg=null;RES=null;SEL=-1;S.f0=null;sync();}
+ else return;
+ if(auto&&S.mode===1&&(d.k||d.md!==undefined)){save();update();autoCalc();return}
+ if(auto&&S.mode===1){const o=runCalc();$('cm').textContent=typeof o==='string'?o:''}
+ save();update();
+});
+let BO=false,BT='pr';
+const RPE=document.querySelector('.result-panel'),RPP=RPE.parentNode;
+const FLS=$('chart').closest('section'),FHm=document.createElement('span');FHm.hidden=true;FLS.before(FHm);
+function placeRp(){const bd=BO&&BT==='bd',rt=BO&&BT==='rt'&&S.mode===1;
+ if(bd){if(FLS.parentNode!==$('bsBd'))$('bsBd').appendChild(FLS)}else if(FLS.parentNode!==FHm.parentNode)FHm.after(FLS);
+ if(rt){if(RPE.parentNode!==$('bsRt'))$('bsRt').appendChild(RPE)}else if(RPE.parentNode!==RPP)RPP.appendChild(RPE)}
+function barTab(t,dir){if(t==='rt'&&S.mode!==1)t='bd';const prev=BT;BT=t;
+ document.querySelectorAll('[data-bt]').forEach(b=>b.classList.toggle('on',b.dataset.bt===t));
+ [['pr','bsPr'],['bd','bsBd'],['rt','bsRt']].forEach(x=>{$(x[1]).hidden=x[0]!==t});
+ if(dir&&prev!==t){const el=$({pr:'bsPr',bd:'bsBd',rt:'bsRt'}[t]);el.classList.remove('sinR','sinL');void el.offsetWidth;el.classList.add(dir>0?'sinR':'sinL')}
+ placeRp();fillBar()}
+function barOpen(o){BO=o;$('barBody').hidden=!o;$('barScrim').hidden=!o;$('barHead').setAttribute('aria-expanded',o);$('barPk').setAttribute('aria-expanded',o);$('bar').classList.toggle('open',o);if(o)barTab(BT);else placeRp()}
+function fillBar(){
+ if(!BO)return;
+ if(BT==='rt'&&S.mode!==1){barTab('bd');return}
+ if(BT==='pr'){
+  const m1=S.mode===1,g=id=>$(id).textContent,rows=[['金红数',g('gr')]];
+  if(m1)rows.push(['金总值',g('gv')],['红件数 × 倍率',g('rc')]);
+  rows.push([g('bl'),g('base')],['大红 / 大金加成',g('add')+' 万'],['最终估价',g('est')+' 万','hl'],['建议出价（'+g('tn')+'）',g('bidv'),'hl'],['×8 / ×10 对照',g('alt')]);
+  if(m1)rows.push(['完整数字',g('full')]);
+  const box=$('bsPr');box.textContent='';
+  rows.forEach(r=>{const d=document.createElement('div');d.className='br'+(r[2]?' '+r[2]:'');const a=document.createElement('span'),b=document.createElement('b');a.textContent=r[0];b.textContent=r[1];d.append(a,b);box.append(d)});
+ }
+}
+$('barHead').addEventListener('click',()=>barOpen(!BO));
+$('barPk').addEventListener('click',()=>barOpen(!BO));
+$('barScrim').addEventListener('click',()=>barOpen(false));
+document.querySelectorAll('[data-bt]').forEach(b=>b.addEventListener('click',()=>barTab(b.dataset.bt,['pr','bd','rt'].indexOf(b.dataset.bt)>['pr','bd','rt'].indexOf(BT)?1:-1)));
+(function(){const bd=$('barBody');let x0=0,y0=0,on=false,moved=false;
+function go(d){const order=S.mode===1?['pr','bd','rt']:['pr','bd'],i=order.indexOf(BT)+d;if(i<0||i>=order.length)return;barTab(order[i],d)}
+bd.addEventListener('pointerdown',e=>{if(e.target.closest('input,select,textarea'))return;x0=e.clientX;y0=e.clientY;on=true;moved=false});
+bd.addEventListener('pointermove',e=>{if(!on)return;const dx=e.clientX-x0,dy=e.clientY-y0;if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.4)moved=true});
+bd.addEventListener('pointerup',e=>{if(!on)return;on=false;const dx=e.clientX-x0,dy=e.clientY-y0;if(moved&&Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.4)go(dx<0?1:-1)});
+bd.addEventListener('pointercancel',()=>{on=false});
+bd.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false}},true);
+document.addEventListener('keydown',e=>{if(!BO||(e.target.closest&&e.target.closest('input,select')))return;if(e.key==='ArrowRight')go(1);else if(e.key==='ArrowLeft')go(-1)});
+})();
+matchMedia('(min-width:900px)').addEventListener('change',e=>{if(e.matches&&BO)barOpen(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&BO)barOpen(false)});
+try{if(localStorage.getItem('dafu-notice')==='1')$('notice').hidden=true}catch(e){}
+(function(){let last='';const u=update;update=function(){S.mode=S.avg!==null?1:0;document.body.classList.toggle('mode1',S.mode===1);u.apply(this,arguments);const v=$('est').textContent;if(v!==last){last=v;['est','bE','bB'].forEach(id=>{const el=$(id);el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop')})}}})();
+sync();
+[['total','purple'],['purple','avg'],['avg',null]].forEach(p=>{const el=$(p[0]);el.setAttribute('enterkeyhint',p[1]?'next':'done');
+ el.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();if(p[1])$(p[1]).focus();else{el.blur();autoCalc(true)}})});
+const openLog=()=>{$('logModal').hidden=false;document.body.style.overflow='hidden'},closeLog=()=>{$('logModal').hidden=true;document.body.style.overflow=''};
+$('openLog').addEventListener('click',openLog);$('logClose').addEventListener('click',closeLog);
+$('logModal').addEventListener('click',e=>{if(e.target===$('logModal'))closeLog()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('logModal').hidden)closeLog()});
+$('openSettings2').addEventListener('click',()=>$('openSettings').click());
+$('openSettings').addEventListener('click',()=>{$('zeroLimit').value=String(S.zeroLimit||0);$('errLimit').value=String(S.errLimit||0)});
+['zeroLimit','errLimit'].forEach(k=>{const el=$(k);el.innerHTML=[3,5,8,10,15,20,30,50,100,300,0].map(v=>'<option value="'+v+'">'+(v?v+' 条':'不限（搜到计算限时结束，可达几百条以上）')+'</option>').join('');el.value=String(S[k]||0);el.addEventListener('change',e=>{S[k]=+e.target.value;save();update()})});
+if(S.total===null)$('total').focus();
+</script>
+</body>
+</html>
