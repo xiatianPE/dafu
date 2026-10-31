@@ -71,7 +71,7 @@ class OverlayService : Service() {
 
     private fun createNativePanel() {
         val view = TextView(this).apply {
-            text = "达芙估价\\n当前估价：等待数据\\n建议出价：等待数据"
+            text = "达芙估价\n当前估价：等待数据\n建议出价：等待数据"
             textSize = 14f
             setTextColor(Color.WHITE)
             typeface = Typeface.DEFAULT_BOLD
@@ -108,7 +108,7 @@ class OverlayService : Service() {
         val data = try { JSONObject(raw) } catch (_: Exception) { return }
         val estimate = format(data.optDouble("valuationWan", Double.NaN))
         val bid = format(data.optDouble("suggestedBidWan", Double.NaN))
-        panel?.text = "达芙估价  ·  拖动调整位置\\n当前估价：$estimate\\n建议出价：$bid"
+        panel?.text = "达芙估价  ·  拖动调整位置\n当前估价：$estimate\n建议出价：$bid"
     }
 
     private fun format(v: Double) = if (v.isNaN() || v.isInfinite()) "等待数据" else String.format("%.2f 万", v)
