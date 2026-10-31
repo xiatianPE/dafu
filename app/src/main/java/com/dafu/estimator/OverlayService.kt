@@ -138,16 +138,16 @@ class OverlayService : Service() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun buildBubble() {
-        val size = dp(52)
+        val size = dp(40)
         val tv = TextView(this).apply {
             text = "估"
             setTextColor(Color.WHITE)
-            textSize = 20f
+            textSize = 15f
             typeface = Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
             background = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(0xDDD9A441.toInt())
+                setColor(0x99D9A441.toInt())
                 setStroke(dp(2), 0x55FFFFFF)
             }
             elevation = dp(4).toFloat()
