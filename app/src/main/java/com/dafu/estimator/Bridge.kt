@@ -1,7 +1,9 @@
 package com.dafu.estimator
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings\nimport android.net.Uri\nimport android.os.Build\nimport android.provider.Settings
+import android.provider.Settings
+import android.net.Uri
+import android.os.Build
 import android.webkit.JavascriptInterface
 import org.json.JSONObject
 class Bridge(private val context:Context){
