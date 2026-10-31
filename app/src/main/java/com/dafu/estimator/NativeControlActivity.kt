@@ -21,7 +21,7 @@ class NativeControlActivity : Activity() {
     private var cardColor = Color.WHITE
     private var textColor = 0xFF1A1E35.toInt()
     private var mutedColor = 0xFF666C90.toInt()
-    private var lineColor = 0xFFDCD FEE.toInt()
+    private var lineColor = 0xFFDCDFEE.toInt()
     private var inputColor = 0xFFECEEF8.toInt()
     private val gold = 0xFFD99A14.toInt()
     private lateinit var status: TextView
@@ -40,7 +40,7 @@ class NativeControlActivity : Activity() {
         dark = Store.get("dafu-theme") == "dark"
         if (dark) {
             bgColor=0xFF0D1021.toInt(); cardColor=0xFF161A30.toInt()
-            textColor=0xFFECE EFA.toInt(); mutedColor=0xFF9A9FC4.toInt()
+            textColor=0xFFECEEFA.toInt(); mutedColor=0xFF9A9FC4.toInt()
             lineColor=0xFF2A3050.toInt(); inputColor=0xFF0D1021.toInt()
         }
         buildUi()
