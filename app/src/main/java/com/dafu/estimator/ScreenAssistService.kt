@@ -10,8 +10,8 @@ import android.text.TextUtils
 import org.json.JSONArray
 import org.json.JSONObject
 class ScreenAssistService:AccessibilityService(){
- override fun onServiceConnected(){serviceInfo=serviceInfo.apply{eventTypes=AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;feedbackType=AccessibilityServiceInfo.FEEDBACK_GENERIC;flags=AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;notificationTimeout=250};active=this}
- override fun onAccessibilityEvent(event:AccessibilityEvent?){active=this}
+ override fun onServiceConnected(){serviceInfo=serviceInfo.apply{eventTypes=AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED or AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;feedbackType=AccessibilityServiceInfo.FEEDBACK_GENERIC;flags=AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS or AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS;notificationTimeout=250};active=this;NativeLog.add("屏幕识别服务已连接")}
+ override fun onAccessibilityEvent(event:AccessibilityEvent?){active=this; if(event?.eventType==AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) NativeLog.add("检测到前台窗口切换") }
  override fun onInterrupt(){}
  override fun onDestroy(){if(active===this)active=null;super.onDestroy()}
  companion object{
@@ -25,7 +25,7 @@ class ScreenAssistService:AccessibilityService(){
    return raw.split(':').any{it.equals(expected,true)}
   }
   fun snapshotJson():String{
-  val svc=active?:return JSONObject().put("enabled",false).put("items",JSONArray()).toString()
+  val svc=active?:run{NativeLog.add("屏幕读取失败：无障碍服务未连接");return JSONObject().put("enabled",false).put("items",JSONArray()).toString()}
   val out=JSONArray();val root=svc.rootInActiveWindow
   if(root!=null){fun walk(n:AccessibilityNodeInfo,path:JSONArray,depth:Int){
    if(depth>18||out.length()>=180)return
@@ -33,7 +33,7 @@ class ScreenAssistService:AccessibilityService(){
    if(label.isNotBlank()||n.isClickable)out.put(JSONObject().put("text",label.take(180)).put("clickable",n.isClickable).put("path",path))
    for(i in 0 until n.childCount){val c=n.getChild(i)?:continue;walk(c,JSONArray(path.toString()).put(i),depth+1)}
   };walk(root,JSONArray(),0)}
-  synchronized(lock){latest=out};return JSONObject().put("enabled",true).put("items",out).toString()
+  synchronized(lock){latest=out};NativeLog.add("屏幕读取完成：${out.length()} 个节点");return JSONObject().put("enabled",true).put("items",out).toString()
  }
  fun clickItem(index:Int):Boolean{
   val svc=active?:return false;val path=synchronized(lock){latest.optJSONObject(index)?.optJSONArray("path")}?:return false
