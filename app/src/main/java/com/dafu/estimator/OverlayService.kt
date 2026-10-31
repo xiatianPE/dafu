@@ -22,7 +22,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.WindowManager\nimport android.widget.Toast
 import android.webkit.WebView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -253,7 +253,7 @@ class OverlayService : Service() {
         var sx=0f;var sy=0f;var sw=0;var sh=0
         return View.OnTouchListener { _,e -> when(e.actionMasked){
             MotionEvent.ACTION_DOWN->{sx=e.rawX;sy=e.rawY;sw=lp.width;sh=lp.height;true}
-            MotionEvent.ACTION_MOVE->{val dm=resources.displayMetrics;lp.width=(sw+(e.rawX-sx).toInt()).coerceIn(dp(240),dm.widthPixels-lp.x);lp.height=(sh+(e.rawY-sy).toInt()).coerceIn(dp(220),dm.heightPixels-lp.y);try{wm.updateViewLayout(target,lp)}catch(_:Exception){};true}
+            MotionEvent.ACTION_MOVE->{val dm=resources.displayMetrics;lp.width=(sw+(e.rawX-sx).toInt()).coerceIn(dp(240),max(dp(240),dm.widthPixels-lp.x));lp.height=(sh+(e.rawY-sy).toInt()).coerceIn(dp(220),max(dp(220),dm.heightPixels-lp.y));try{wm.updateViewLayout(target,lp)}catch(_:Exception){};true}
             MotionEvent.ACTION_UP->true
             else->false
         }}
