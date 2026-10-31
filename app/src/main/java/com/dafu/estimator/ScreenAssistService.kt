@@ -3,6 +3,10 @@ import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
+import android.content.ComponentName
+import android.content.Context
+import android.provider.Settings
+import android.text.TextUtils
 import org.json.JSONArray
 import org.json.JSONObject
 class ScreenAssistService:AccessibilityService(){
@@ -14,7 +18,13 @@ class ScreenAssistService:AccessibilityService(){
  @Volatile private var active:ScreenAssistService?=null
  @Volatile private var latest=JSONArray()
  private val lock=Any()
- fun snapshotJson():String{
+ fun isConnected():Boolean=active!=null
+  fun isEnabled(context:Context):Boolean{
+   val raw=Settings.Secure.getString(context.contentResolver,Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)?:return false
+   val expected=ComponentName(context,ScreenAssistService::class.java).flattenToString()
+   return raw.split(':').any{it.equals(expected,true)}
+  }
+  fun snapshotJson():String{
   val svc=active?:return JSONObject().put("enabled",false).put("items",JSONArray()).toString()
   val out=JSONArray();val root=svc.rootInActiveWindow
   if(root!=null){fun walk(n:AccessibilityNodeInfo,path:JSONArray,depth:Int){
