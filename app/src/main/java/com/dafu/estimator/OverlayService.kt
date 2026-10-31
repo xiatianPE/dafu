@@ -278,6 +278,7 @@ class OverlayService : Service() {
                 w.reload()
             }
         } catch (e: Exception) {
+            Toast.makeText(this, "悬浮窗启动失败："+(e.message ?: "权限或系统限制"), Toast.LENGTH_LONG).show()
             stopSelf() // 例如悬浮窗权限被收回
         }
     }
@@ -292,6 +293,7 @@ class OverlayService : Service() {
                 bubbleOn = true
             }
         } catch (e: Exception) {
+            Toast.makeText(this, "悬浮窗显示失败："+(e.message ?: "系统限制"), Toast.LENGTH_LONG).show()
             stopSelf()
         }
     }
