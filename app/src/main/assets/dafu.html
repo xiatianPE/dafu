@@ -238,7 +238,7 @@ details>summary{cursor:pointer}
 <label class="setting-field">零误差条目数<select id="zeroLimit" class="sf"><option value="3">3 条</option><option value="5">5 条</option><option value="8">8 条</option><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option><option value="30">30 条</option><option value="0" selected>不限</option></select></label>
 <label class="setting-field">带误差条目数<select id="errLimit" class="sf"><option value="3">3 条</option><option value="5">5 条</option><option value="8">8 条</option><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option><option value="30">30 条</option><option value="0" selected>不限</option></select></label>
 </div><p class="hint" style="margin-top:12px">限时结束后返回已找到的方案；金藏品少于下限的组合会被过滤。条目数最少 3 条，既是搜索目标也是显示上限；选「不限」会一直搜到计算限时结束，想要几百条建议把计算限时调到 8–15 秒。总价值估算按全部找到的方案计算。</p>
-<div class="modal-actions"><button class="go" id="settingsClose">关闭</button></div>
+<section style="border-top:1px solid var(--line);padding-top:12px;margin-top:8px"><h3 style="font-size:15px;margin:0 0 8px">屏幕辅助与出价</h3><p class="hint">系统无障碍授权后读取当前窗口可访问文字/控件。每次点击由你手动确认。</p><div style="display:grid;gap:8px"><button class="go" id="enableScreenAssist">开启屏幕读取权限</button><button class="go" id="refreshScreen">读取当前屏幕</button><div id="screenStatus" class="hint">尚未读取</div><div id="screenItems" style="display:grid;gap:6px;max-height:180px;overflow:auto"></div><button class="go" id="toggleOverlay">开启可拖动/缩放悬浮窗</button><label class="setting-field"><input id="assistBid" type="checkbox" style="width:auto"> 启用自动出价辅助</label><p class="hint">仅辅助生成/填入建议金额；最终提交仍需你核对确认，不会后台自动竞价。</p></div></section><div class="modal-actions"><button class="go" id="settingsClose">关闭</button></div>
 </div></div>
 <div class="mk" id="logModal" role="dialog" aria-modal="true" aria-label="公告" hidden><div class="mb">
 <h2 class="modal-title"><svg class="ic"><use href="#i-bell"/></svg> 公告 · 更新日志</h2>
@@ -739,7 +739,13 @@ const openLog=()=>{$('logModal').hidden=false;document.body.style.overflow='hidd
 $('openLog').addEventListener('click',openLog);$('logClose').addEventListener('click',closeLog);
 $('logModal').addEventListener('click',e=>{if(e.target===$('logModal'))closeLog()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('logModal').hidden)closeLog()});
-$('openSettings2').addEventListener('click',()=>$('openSettings').click());
+$('openSettings2').addEventListener('click',()=>$('openSettings').click());const ss=$('screenStatus'),si=$('screenItems');
+$('enableScreenAssist').addEventListener('click',()=>Native.openAccessibilitySettings());
+$('refreshScreen').addEventListener('click',()=>{try{const d=JSON.parse(Native.readScreen());si.innerHTML='';if(!d.enabled){ss.textContent='尚未授权，请在系统无障碍设置中启用服务';return;}ss.textContent='读取到 '+d.items.length+' 个控件';d.items.forEach((x,i)=>{const b=document.createElement('button');b.className='settings-trigger';b.textContent=(x.text||'无文字控件')+(x.clickable?' · 可点击':'');b.onclick=()=>{if(confirm('确认执行一次点击？'))ss.textContent=Native.clickScreenItem(i)?'点击已执行':'点击失败，请重新读取';};si.appendChild(b);});}catch(e){ss.textContent='读取失败：'+e.message;}});
+$('toggleOverlay').addEventListener('click',()=>{Native.setOverlayEnabled(true);ss.textContent='已请求开启悬浮窗';});
+$('assistBid').checked=localStorage.getItem('dafu-auto-bid-assist')==='1';
+$('assistBid').addEventListener('change',e=>localStorage.setItem('dafu-auto-bid-assist',e.target.checked?'1':'0'));
+
 $('openSettings').addEventListener('click',()=>{$('zeroLimit').value=String(S.zeroLimit||0);$('errLimit').value=String(S.errLimit||0)});
 ['zeroLimit','errLimit'].forEach(k=>{const el=$(k);el.innerHTML=[3,5,8,10,15,20,30,50,100,300,0].map(v=>'<option value="'+v+'">'+(v?v+' 条':'不限（搜到计算限时结束，可达几百条以上）')+'</option>').join('');el.value=String(S[k]||0);el.addEventListener('change',e=>{S[k]=+e.target.value;save();update()})});
 if(S.total===null)$('total').focus();

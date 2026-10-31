@@ -212,6 +212,9 @@ class OverlayService : Service() {
 
         p.addView(head, LinearLayout.LayoutParams(match, dp(36)))
         p.addView(wv, LinearLayout.LayoutParams(match, 0, 1f))
+        val resize = TextView(this).apply { text="◢"; textSize=18f; gravity=Gravity.CENTER; setTextColor(0xFFE0B45A.toInt()) }
+        p.addView(resize, LinearLayout.LayoutParams(dp(34), dp(30)).apply { gravity=Gravity.RIGHT })
+        resize.setOnTouchListener(resizer(p,lp))
 
         web = wv
         panel = p
@@ -244,6 +247,17 @@ class OverlayService : Service() {
         lp.y = lp.y.coerceIn(0, max(0, dm.heightPixels - lp.height))
     }
 
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun resizer(target: View, lp: WindowManager.LayoutParams): View.OnTouchListener {
+        var sx=0f;var sy=0f;var sw=0;var sh=0
+        return View.OnTouchListener { _,e -> when(e.actionMasked){
+            MotionEvent.ACTION_DOWN->{sx=e.rawX;sy=e.rawY;sw=lp.width;sh=lp.height;true}
+            MotionEvent.ACTION_MOVE->{val dm=resources.displayMetrics;lp.width=(sw+(e.rawX-sx).toInt()).coerceIn(dp(240),dm.widthPixels-lp.x);lp.height=(sh+(e.rawY-sy).toInt()).coerceIn(dp(220),dm.heightPixels-lp.y);try{wm.updateViewLayout(target,lp)}catch(_:Exception){};true}
+            MotionEvent.ACTION_UP->true
+            else->false
+        }}
+    }
     // ---------- 显示 / 隐藏 ----------
 
     private fun showPanel() {
