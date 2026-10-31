@@ -87,8 +87,8 @@ class NativeControlActivity : Activity() {
         val raw = Store.get("dafu-auction-live") ?: return
         try {
             val o = org.json.JSONObject(raw)
-            estimate.text = "当前估价\\n" + amount(o.optDouble("valuationWan", Double.NaN))
-            suggested.text = "建议出价\\n" + amount(o.optDouble("suggestedBidWan", Double.NaN))
+            estimate.text = "当前估价\n" + amount(o.optDouble("valuationWan", Double.NaN))
+            suggested.text = "建议出价\n" + amount(o.optDouble("suggestedBidWan", Double.NaN))
         } catch (_: Exception) {}
     }
 
