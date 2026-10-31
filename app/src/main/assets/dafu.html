@@ -2,13 +2,13 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>达芙拍卖估价器</title>
 <script>try{var t=localStorage.getItem('dafu-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <style>
-:root{--bg:#f2f3f9;--card:#fff;--line:#dcdfee;--tx:#1a1e35;--mu:#666c90;--in:#eceef8;--pur:#8b5cf6;--gold:#d99a14;--red:#e8374f;--btn:#1a1e35;--btnt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1021;--card:#161a30;--line:#2a3050;--tx:#eceefa;--mu:#9a9fc4;--in:#0d1021;--pur:#a78bfa;--gold:#f2b84b;--red:#ff5468;--btn:#eceefa;--btnt:#0d1021;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#0d1021;--card:#161a30;--line:#2a3050;--tx:#eceefa;--mu:#9a9fc4;--in:#0d1021;--pur:#a78bfa;--gold:#f2b84b;--red:#ff5468;--btn:#eceefa;--btnt:#0d1021;color-scheme:dark}
+:root{--bg:#f2f3f9;--card:#fff;--line:#dcdfee;--tx:#1a1e35;--mu:#666c90;--in:#eceef8;--pur:#3979a8;--gold:#d99a14;--red:#e8374f;--btn:#1a1e35;--btnt:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1021;--card:#161a30;--line:#2a3050;--tx:#eceefa;--mu:#9a9fc4;--in:#0d1021;--pur:#69a8d2;--gold:#f2b84b;--red:#ff5468;--btn:#eceefa;--btnt:#0d1021;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1021;--card:#161a30;--line:#2a3050;--tx:#eceefa;--mu:#9a9fc4;--in:#0d1021;--pur:#69a8d2;--gold:#f2b84b;--red:#ff5468;--btn:#eceefa;--btnt:#0d1021;color-scheme:dark}
 :root{--grn:#2fa66a;--est:#ff8a00}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--grn:#4fd18b;--est:#ffb020}}
 :root[data-theme="dark"]{--grn:#4fd18b;--est:#ffb020}
@@ -26,7 +26,7 @@ button,input{font-family:inherit}
 .st button{width:52px;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:22px;border-radius:12px;cursor:pointer}
 .st button:active{transform:scale(.95)}
 .st input{flex:1;min-width:0;text-align:center;font-weight:800;font-size:26px;line-height:1;padding:13px 8px;border:1px solid var(--line);border-radius:12px;background:var(--in);color:var(--tx)}
-input:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--pur);outline-offset:2px}
+input:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .lb{font-size:13px;color:var(--mu);font-weight:700;margin:12px 0 6px}
 .ls{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .it{position:relative;border:2px solid;border-radius:12px;color:var(--tx)}
@@ -150,7 +150,7 @@ body.mode1 .m0{display:none}
 .settings{margin:0 0 14px}.setting-field{font-size:14px;font-weight:600}.settings .hint{margin:10px 0 0}.ngw{margin-top:22px}
 .ngs li.on{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 15%,transparent)}
 .gb{border:1px solid var(--line);background:transparent;color:inherit;border-radius:6px;min-width:26px;height:26px;padding:0 4px;cursor:pointer;font-size:14px;line-height:1}
-.gadd{border:0;background:none;color:inherit;cursor:pointer;font:inherit;padding:0}
+.gadd{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;text-align:left;border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--gold) 10%,var(--card));color:var(--tx);cursor:pointer;font:inherit;font-size:15px;font-weight:750;padding:11px 13px;line-height:1.35}.gadd:active{transform:scale(.99)}#gres{display:grid;grid-template-columns:1fr;gap:7px}#gres li{display:block;width:100%}.ghistory{margin-top:8px}.ghistory .ngs{display:grid;grid-template-columns:1fr;gap:5px}.ghistory .ngs li{border-radius:10px;padding:7px 10px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px}.ghistory .gh-add{border:0;background:none;color:var(--gold);font-weight:800;cursor:pointer;font-size:13px;white-space:nowrap}
 .mk{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.58);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);animation:veilIn .22s ease both}
 .mk[hidden]{display:none}
 .mb{max-width:420px;width:100%;max-height:min(82vh,680px);overflow:auto;background:var(--card);color:var(--tx);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 24px 80px #0004;animation:popIn .28s cubic-bezier(.2,.8,.2,1) both}
@@ -158,13 +158,15 @@ body.mode1 .m0{display:none}
 @keyframes popIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.mk,.mb{animation:none}}
 .mb p{margin:0 0 16px;line-height:1.7}
-.mb .ft{display:flex;justify-content:flex-end;gap:8px}.modal-title{font-size:18px;font-weight:850;margin:0 0 14px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.modal-actions button{min-width:96px}.settings-trigger{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap}.result-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.result-heading h2{margin:0}
+.mb .ft{display:flex;justify-content:flex-end;gap:8px}.modal-title{font-size:18px;font-weight:850;margin:0 0 14px}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.modal-actions button{min-width:96px}.icon-only{width:40px;min-width:40px;height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center}.settings-trigger.icon-only{padding:0}.icon-only .ic{width:20px;height:20px}
+.settings-trigger{border:1px solid var(--line);background:var(--card);color:var(--tx);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:750;cursor:pointer;white-space:nowrap}.result-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.result-heading h2{margin:0}
 .top>div:first-child{flex:1 1 200px}.corner{display:flex;gap:8px;align-items:center;align-self:flex-start;order:3}.corner .settings-trigger{display:inline-flex;align-items:center;gap:4px}.corner #openSettings2{display:none}
 @media(max-width:899px){.corner{order:1;margin-left:auto}.corner #openSettings2{display:inline-flex}.tools{order:4;flex-basis:100%}.pane.out,.rsec,main>.rs{display:none!important}}
 select.sf{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit;padding:10px}
 .logl h3{margin:12px 0 4px;font-size:14px}.logl ul{margin:0;padding-left:18px;line-height:1.6;font-size:13.5px}
 #rtab .gh{display:flex;align-items:center;gap:8px;margin:6px 0 0;font-size:12.5px;font-weight:800}#rtab .gh::after{content:"";flex:1;height:2px;border-radius:2px;background:currentColor;opacity:.3}#rtab .gh.z{color:var(--grn)}#rtab .gh.e{color:var(--gold)}
-#rtab .sep{border-top:2px dashed var(--line);margin:12px 0 2px}#rtab .zgroup{display:grid;gap:6px}
+#rtab .sep{border-top:2px dashed var(--line);margin:12px 0 2px}
+#rtab .scheme-group{border:1px solid var(--line);border-radius:11px;margin:7px 0;overflow:hidden;background:var(--card)}#rtab .scheme-group>summary{padding:11px 12px;cursor:pointer;font-weight:800;display:flex;justify-content:space-between;gap:10px;list-style:none}#rtab .scheme-group>summary::-webkit-details-marker{display:none}#rtab .scheme-group>summary:after{content:"＋";color:var(--mu)}#rtab .scheme-group[open]>summary:after{content:"−"}#rtab .scheme-group.zero>summary{border-left:4px solid var(--grn)}#rtab .scheme-group.error>summary{border-left:4px solid var(--gold)}#rtab .scheme-group .group-content{padding:0 7px 8px;display:grid;gap:6px}#rtab .scheme-group .group-more{width:100%;padding:8px;border:1px dashed var(--line);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit;cursor:pointer}#rtab .zgroup{display:grid;gap:6px}
 #rtab details.more{border:1px dashed var(--line);border-radius:10px;padding:4px 7px}#rtab details.more>summary{cursor:pointer;font-size:12.5px;font-weight:700;padding:5px 2px;color:var(--mu)}
 .mb .go{padding:10px 18px}
 .fl select.x{font-size:15px;font-weight:700;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--in);color:var(--tx);max-width:100%}
@@ -225,6 +227,79 @@ details>summary{cursor:pointer}
 #bar .bs.sinL{animation:sinL .32s cubic-bezier(.2,.8,.2,1)}
 @keyframes sinR{from{transform:translateX(36px);opacity:0}to{transform:none;opacity:1}}
 @keyframes sinL{from{transform:translateX(-36px);opacity:0}to{transform:none;opacity:1}}
+
+/* ===== 小窗适配（html.mini）：窗口宽≤480 或 高≤560 自动启用，也可在顶部手动切换 ===== */
+html{overflow-x:hidden}
+.seg.txt button{font-size:12.5px}
+html.mini body{overflow-x:hidden}
+html.mini main{padding:8px 8px 66px;max-width:100%}
+html.mini h1{font-size:18px;margin:0;line-height:1.3}
+html.mini .sub,html.mini .lay{display:none}
+html.mini .top{margin:0 0 10px;gap:6px 8px}
+html.mini .tools{gap:6px}
+html.mini .seg{padding:2px}
+html.mini .seg button{font-size:0;padding:5px 9px}
+html.mini .seg .ic{width:16px;height:16px;margin:0}
+html.mini .seg.txt button{font-size:12px;padding:5px 9px}
+html.mini .settings-trigger{padding:5px 9px;font-size:12px;border-radius:9px}
+html.mini .step{margin:0 0 14px}
+html.mini .step h2,html.mini .cd h2{font-size:14.5px;line-height:1.4}
+html.mini .hint{font-size:12px;margin:0 0 6px;line-height:1.45}
+html.mini .st{gap:6px}
+html.mini .st button{width:42px;font-size:18px;border-radius:10px}
+html.mini .st .ic{width:18px;height:18px}
+html.mini .st input{font-size:20px;padding:9px 6px;border-radius:10px}
+html.mini .lb{font-size:12px;margin:8px 0 4px}
+html.mini .ls{gap:6px}
+html.mini .tg{padding:6px 9px;font-size:12.5px}
+html.mini .qt{padding:0 8px 6px}
+html.mini .qt button{width:32px;height:26px}
+html.mini .sm{font-size:12.5px;margin:8px 0 0}
+html.mini .af{gap:6px}
+html.mini .af input{font-size:14px;padding:8px 10px;border-radius:10px}
+html.mini .go{padding:9px;font-size:14px;border-radius:10px}
+html.mini .cc button{padding:8px;font-size:13px}
+html.mini .res{padding:14px 12px;border-radius:14px}
+html.mini .est{font-size:40px}
+html.mini .row{font-size:13px;padding:6px 0}
+html.mini .chip{padding:5px 12px;font-size:13px}
+html.mini .cd{margin-top:14px}
+html.mini .fl{font-size:12.5px;margin:6px 0 2px}
+html.mini .fl input{font-size:14px;padding:6px 8px;width:68px}
+html.mini .tiers{gap:6px}
+html.mini .tr{padding:7px 3px;font-size:12px;border-radius:10px}
+html.mini .tr span{font-size:14px}
+html.mini .rs{margin-top:10px;padding:7px 16px;font-size:13px}
+html.mini .note{font-size:11.5px;margin:10px 0 0}
+html.mini .ng>summary{padding:9px 11px;font-size:13px}
+html.mini .ngs li{font-size:12px;padding:2px 8px}
+html.mini .mk{padding:8px}
+html.mini .mb{padding:14px;border-radius:14px;max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px)}
+html.mini .mb p{font-size:13px;line-height:1.6;margin:0 0 12px}
+html.mini .modal-title{font-size:16px;margin:0 0 10px}
+html.mini .modal-actions{margin-top:12px}
+html.mini .modal-actions button,html.mini .mb .go{min-width:0;padding:8px 14px}
+html.mini select.sf,html.mini .setting-field select{padding:8px!important;font-size:14px}
+html.mini .logl h3{font-size:13px}
+html.mini .logl ul{font-size:12.5px}
+html.mini #barHead{padding:7px 12px calc(7px + env(safe-area-inset-bottom,0px));font-size:13px}
+html.mini #barHead b{font-size:18px}
+html.mini #barBody{max-height:min(68vh,calc(100vh - 80px));max-height:min(68dvh,calc(100dvh - 80px));padding:8px 10px}
+html.mini #bar .bt button{padding:6px 2px;font-size:12px}
+html.mini .br{padding:6px 0;font-size:13px}
+html.mini .br.hl b{font-size:16px}
+html.mini #rtab .rscroll{max-height:42vh;max-height:42dvh}
+html.mini .utilrows{max-height:150px}
+html.mini .rw{padding:7px 8px;font-size:12.5px}
+html.mini .rw b{font-size:14px}
+html.mini #rtab details.scheme>summary{font-size:12px}
+html.mini .result-panel{padding:6px}
+@media (max-width:320px){html.mini .ls{grid-template-columns:1fr}html.mini .est{font-size:34px}html.mini h1{font-size:16px}}
+@media (max-height:440px){html.mini .step>.hint{display:none}html.mini .res .fm{display:none}html.mini main{padding-bottom:56px}}
+#rtab .rscroll .rw,#rtab .subcombo .rw{animation:none}
+#rtab .scheme,#rtab .subcombo .rw{content-visibility:auto;contain-intrinsic-size:auto 96px}
+#rtab .lzm{display:block;width:100%;margin:6px 0 2px;padding:9px;border:1px dashed var(--line);border-radius:10px;background:var(--card);color:var(--mu);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+#rtab .lzm[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -237,12 +312,25 @@ details>summary{cursor:pointer}
 <label class="setting-field">最低金藏品数<select id="minGoldCount" style="display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit;padding:10px"><option value="1" selected>1 件</option><option value="2">2 件</option><option value="3">3 件</option><option value="4">4 件</option><option value="5">5 件</option><option value="6">6 件</option><option value="7">7 件</option><option value="8">8 件</option><option value="9">9 件</option><option value="10">10 件</option></select></label>
 <label class="setting-field">零误差条目数<select id="zeroLimit" class="sf"><option value="3">3 条</option><option value="5">5 条</option><option value="8">8 条</option><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option><option value="30">30 条</option><option value="0" selected>不限</option></select></label>
 <label class="setting-field">带误差条目数<select id="errLimit" class="sf"><option value="3">3 条</option><option value="5">5 条</option><option value="8">8 条</option><option value="10">10 条</option><option value="15">15 条</option><option value="20">20 条</option><option value="30">30 条</option><option value="0" selected>不限</option></select></label>
-</div><p class="hint" style="margin-top:12px">限时结束后返回已找到的方案；金藏品少于下限的组合会被过滤。条目数最少 3 条，既是搜索目标也是显示上限；选「不限」会一直搜到计算限时结束，想要几百条建议把计算限时调到 8–15 秒。总价值估算按全部找到的方案计算。</p>
-<section style="border-top:1px solid var(--line);padding-top:12px;margin-top:8px"><h3 style="font-size:15px;margin:0 0 8px">屏幕辅助与出价</h3><p class="hint">系统无障碍授权后读取当前窗口可访问文字/控件。每次点击由你手动确认。</p><div style="display:grid;gap:8px"><button class="go" id="enableScreenAssist">开启屏幕读取权限</button><button class="go" id="refreshScreen">读取当前屏幕</button><div id="screenStatus" class="hint">尚未读取</div><div id="screenItems" style="display:grid;gap:6px;max-height:180px;overflow:auto"></div><button class="go" id="toggleOverlay">开启可拖动/缩放悬浮窗</button><label class="setting-field"><input id="assistBid" type="checkbox" style="width:auto"> 启用自动出价辅助</label><p class="hint">仅辅助生成/填入建议金额；最终提交仍需你核对确认，不会后台自动竞价。</p></div></section><div class="modal-actions"><button class="go" id="settingsClose">关闭</button></div>
+<div style="border-top:1px solid var(--line);padding-top:12px;margin-top:2px"><label class="setting-field" style="display:flex;align-items:center;gap:10px"><input id="berserkMode" type="checkbox" style="width:20px;height:20px;accent-color:var(--red)"> 开发者模式 · 狂暴模式</label><p class="hint" style="margin-top:6px">突破条目数上限，持续搜索至限时结束。可能增加发热和耗电。</p></div>
+</div><p class="hint" style="margin-top:12px">限时结束后返回已找到的方案；金件数低于下限的组合会被过滤。「不限」会持续搜索至限时结束。估价按已找到的方案计算。</p>
+<section style="border-top:1px solid var(--line);padding-top:12px;margin-top:8px">
+<h3 style="font-size:15px;margin:0 0 8px">屏幕辅助与出价接口</h3>
+<p class="hint">启用系统无障碍授权后，可读取当前窗口可访问的文字和控件。点击动作必须在网页内逐项确认。</p>
+<div class="af">
+<button class="settings-trigger" id="enableScreenAssist">开启屏幕读取权限</button>
+<button class="settings-trigger" id="refreshScreen">读取当前屏幕</button>
+<div class="hint" id="screenStatus">尚未读取</div>
+<div id="screenItems" style="display:grid;gap:6px;max-height:180px;overflow:auto"></div>
+<button class="settings-trigger" id="toggleOverlay">开启悬浮窗</button>
+<label class="setting-field"><input id="assistBid" type="checkbox" style="width:auto"> 启用建议出价辅助</label>
+<p class="hint">出价建议会同步给原生接口；提交操作仍由你本人核对确认。</p>
+</div></section><div class="modal-actions"><button class="go" id="settingsClose">关闭</button></div>
 </div></div>
 <div class="mk" id="logModal" role="dialog" aria-modal="true" aria-label="公告" hidden><div class="mb">
 <h2 class="modal-title"><svg class="ic"><use href="#i-bell"/></svg> 公告 · 更新日志</h2>
 <div class="logl">
+<h3>第10轮 · 性能</h3><ul><li>反推搜索挪到后台线程，计算时页面不再卡住；到计算限时立刻带着已找到的方案出结果，不会再超时。</li><li>结果列表改为分批显示（先 30 条，点「再显示」继续），展开零误差子组合和打开底部抽屉不再卡顿；点选方案只更新高亮，不重画整张表。</li><li>普通模式「不限」各最多 600 条；开发者狂暴模式可突破该条目上限。输入变化会立刻中止上一次计算。</li></ul>
 <h3>第9轮</h3><ul><li>条目数设置现在会真正影响搜索：选「不限」不再找到几个就停，会搜到计算限时结束，可找到几百条以上；新增 50 / 100 / 300 条档位。</li></ul>
 <h3>第8轮</h3><ul><li>反推表：零误差方案默认显示 3 条，其余点击展开；零误差与带误差方案之间加了分界线和标题。</li></ul>
 <h3>第7轮</h3><ul><li>设置新增「零误差条目数」「带误差条目数」，最少 3 条，可选不限；右上角新增公告按钮。</li></ul>
@@ -252,8 +340,9 @@ details>summary{cursor:pointer}
 <div id="barScrim" hidden></div>
 <div id="bar">
 <div id="barBody" hidden>
-<div class="bt" role="tablist"><button data-bt="pr" class="on">价格明细</button><button data-bt="bd">建议出价</button><button data-bt="rt" class="m1">反推表</button></div>
+<div class="bt" role="tablist"><button data-bt="pr" class="on">价格明细</button><button data-bt="gold">所见大金</button><button data-bt="bd">建议出价</button><button data-bt="rt" class="m1">反推表</button></div>
 <div class="bs" id="bsPr"></div>
+<div class="bs" id="bsGold" hidden></div>
 <div class="bs" id="bsBd" hidden></div>
 <div class="bs m1" id="bsRt" hidden></div>
 
@@ -264,10 +353,10 @@ details>summary{cursor:pointer}
 <main>
 <header class="top">
 <div><h1>达芙拍卖估价器</h1>
-<p class="sub">估价结果仅供参考。</p></div>
-<div class="corner"><button class="settings-trigger" id="openLog" aria-haspopup="dialog"><svg class="ic"><use href="#i-bell"/></svg> 公告</button><button class="settings-trigger" id="openSettings2" aria-haspopup="dialog"><svg class="ic"><use href="#i-sliders"/></svg> 设置</button></div>
+<p class="sub">仅供参考</p></div>
+<div class="corner"><button class="settings-trigger icon-only" id="openLog" aria-label="公告" title="公告" aria-haspopup="dialog"><svg class="ic"><use href="#i-bell"/></svg></button><button class="settings-trigger icon-only" id="openSettings2" aria-label="设置" title="设置" aria-haspopup="dialog"><svg class="ic"><use href="#i-sliders"/></svg></button></div>
 <div class="tools">
-<span class="seg" role="group" aria-label="主题"><button data-th="light"><svg class="ic"><use href="#i-sun"/></svg>浅色</button><button data-th="dark"><svg class="ic"><use href="#i-moon"/></svg>深色</button><button data-th="auto"><svg class="ic"><use href="#i-auto"/></svg>跟随系统</button></span>
+<span class="seg" role="group" aria-label="主题"><button data-th="light" aria-label="浅色模式" title="浅色模式"><svg class="ic"><use href="#i-sun"/></svg></button><button data-th="dark" aria-label="深色模式" title="深色模式"><svg class="ic"><use href="#i-moon"/></svg></button><button data-th="auto" aria-label="跟随系统" title="跟随系统"><svg class="ic"><use href="#i-auto"/></svg></button></span>
 <span class="seg lay" role="group" aria-label="桌面布局"><button data-ly="0">左输入 · 右报价</button><button data-ly="1">左报价 · 右输入</button></span>
 </div>
 </header>
@@ -277,20 +366,20 @@ details>summary{cursor:pointer}
 
 <section class="step">
 <h2>紫金红总数</h2>
-<p class="hint">填写全场紫、金、红藏品总数。</p>
+<p class="hint">填写全场藏品总数。</p>
 <div class="st"><button data-k="total" data-d="-1" aria-label="减少"><svg class="ic"><use href="#i-minus"/></svg></button><input id="total" type="number" inputmode="numeric" min="0" placeholder="紫金红总数"><button data-k="total" data-d="1" aria-label="增加"><svg class="ic"><use href="#i-plus"/></svg></button></div>
 </section>
 
 <section class="step">
 <h2>紫件计数器</h2>
-<p class="hint">填写紫件数，自动计算金红数。</p>
+<p class="hint">填写紫件数，自动补算金红数。</p>
 <div class="st"><button data-k="purple" data-d="-1" aria-label="减少"><svg class="ic"><use href="#i-minus"/></svg></button><input id="purple" type="number" inputmode="numeric" min="0" placeholder="紫件计数器"><button data-k="purple" data-d="1" aria-label="增加"><svg class="ic"><use href="#i-plus"/></svg></button></div>
 <button class="rs" data-r="1">重置本局</button>
 </section>
 
 <section class="step">
 <h2>金均仪器（选填）</h2>
-<p class="hint">不填：按固定倍率自动估价；填写读数：自动切换为金均反推，所见大金按原价计入。</p>
+<p class="hint">填入金均读数后自动切换反推模式。</p>
 <div class="af"><input id="avg" type="number" inputmode="decimal" min="0" step="any" placeholder="金均（完整数字），如 45321 或 45321.5"></div>
 
 <button class="go m1" id="calc" style="width:100%;margin-top:10px">立即计算</button><p class="am" id="cm"></p>
@@ -298,7 +387,7 @@ details>summary{cursor:pointer}
 
 <section class="step">
 <h2><span class="m0">所见大红 / 大金</span><span class="m1">所见大红</span></h2>
-<p class="hint">点选看到的藏品；重复出现时点「＋」。<span class="m1">金藏品请在页面最下方「所见大金」里加入。</span></p>
+<p class="hint">点选已见藏品；重复出现点「＋」。<span class="m1">金藏品请在「所见大金」中加入。</span></p>
 <p class="lb">未知红（仓库里看到、但列表里没有的红色产品）</p>
 <div class="ngs" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px">
   <span>已记录 <b id="unknownRCount">0</b> 件</span>
@@ -306,7 +395,7 @@ details>summary{cursor:pointer}
   <button class="gb" data-ur="1" aria-label="增加未知红">＋ 添加一件</button>
   <button class="gb" data-ur="0" aria-label="清空未知红">清空</button>
 </div>
-<p class="hint" style="margin-top:-4px">每添加一件，反推结果都会排除红色件数不足的方案，避免出现“零红”。无需填写价格。</p>
+<p class="hint" style="margin-top:-4px">添加后自动排除红件数不足的方案，无需填价。</p>
 <p class="lb">已知大红</p><div class="ls" id="listR"></div>
 <p class="lb m0">大金</p><div class="ls m0" id="listG"></div>
 <p class="sm" id="sm"></p>
@@ -318,14 +407,14 @@ details>summary{cursor:pointer}
 </details>
 </section>
 
-<section class="step m1"><details class="ad ng"><summary id="gsum"><svg class="ic"><use href="#i-sparkle"/></svg> 所见大金 / 新金藏品（点击展开）</summary>
-<p class="hint" style="margin-top:10px">搜索并加入看到的金藏品；每种最多 3 件，变更后自动重算。</p>
+<section class="step" id="goldTools">
+<p class="hint" style="margin-top:0">搜索并加入已见金藏品，每种最多 3 件。</p>
 <p class="lb">已加入的大金</p><ul class="ngs" id="gsel"></ul>
 <div class="af"><input id="gq" placeholder="搜索金藏品：名称或价格，如 大饼 或 4500"></div>
 <ul class="ngs" id="gres"></ul>
 <p class="lb">新增金藏品（价格表里没有的）</p><ul class="ngs" id="ngn"></ul>
 <div class="af"><input id="nn" placeholder="新金藏品名称" maxlength="14"><input id="np" type="number" inputmode="decimal" min="0" step="any" placeholder="价格（完整数字），如 35000"><p class="am" id="nm"></p><button class="go" id="ng">添加新金藏品</button></div>
-<details class="ad"><summary>过往金藏品（内置价格表，点击展开）</summary><ul class="ngs" id="ngo"></ul></details></details></section>
+<details class="ad"><summary>内置金藏品价格表（点击展开）</summary><ul class="ngs" id="ngo"></ul></details><div class="ghistory"><p class="lb">最近添加大金（最多 5 条）</p><ul class="ngs" id="ghistory"></ul></div></section>
 
 
 
@@ -350,7 +439,7 @@ details>summary{cursor:pointer}
 
 <section class="cd">
 <h2>估价浮动与建议出价</h2>
-<p class="hint">按 ±<span id="fv">—</span> 万展示估价浮动，虚线为建议出价。</p>
+<p class="hint">估价浮动 ±<span id="fv">—</span> 万；虚线为建议出价。</p>
 <div class="fl m1"><label for="gf">浮动区间 ±<b id="gfv">10</b> 万</label><input id="gf" class="rg" type="range" min="0" max="60" step="1" value="10"></div>
 <div class="fl m0"><label for="gf0">浮动区间 ±<b id="gf0v">—</b> 万</label><input id="gf0" class="rg" type="range" min="0" max="200" step="1" value="0"></div>
 
@@ -358,15 +447,15 @@ details>summary{cursor:pointer}
 <p class="lb">建议出价（点选一档）</p>
 <div class="tiers" id="tiers"></div>
 <p class="sm" id="bd"></p>
-<p class="hint m1" style="margin-top:8px">金均模式默认浮动 ±10 万，可拖动调整。</p>
-<p class="hint m0" style="margin-top:8px">保守、稳妥、激进出价按浮动区间计算，可拖动滑块调整。</p>
+<p class="hint m1" style="margin-top:8px">默认浮动 ±10 万，可拖动调整。</p>
+<p class="hint m0" style="margin-top:8px">拖动滑块调整保守、稳妥、激进出价。</p>
 
 </section>
 
 </div>
 </div>
-<section class="cd m1 rsec"><div class="result-heading"><h2>反推结果表</h2><button class="settings-trigger" id="openSettings" aria-haspopup="dialog" aria-controls="settingsModal"><svg class="ic"><use href="#i-sliders"/></svg> 设置</button></div>
-<p class="hint">方案按估价差值排序，误差保留一位小数。</p>
+<section class="cd m1 rsec"><div class="result-heading"><h2>反推结果表</h2><button class="settings-trigger icon-only" id="openSettings" aria-label="计算设置" title="计算设置" aria-haspopup="dialog" aria-controls="settingsModal"><svg class="ic"><use href="#i-sliders"/></svg></button></div>
+<p class="hint">按估价差值排序，误差保留 1 位小数。</p>
 <div class="result-panel"><div class="sortbar"><label for="sortMode" class="lb">排序</label>
 <select id="sortMode" style="border:1px solid var(--line);border-radius:8px;background:var(--in);color:var(--tx);font:inherit">
 <option value="price-desc">价格从高到低</option>
@@ -382,11 +471,12 @@ details>summary{cursor:pointer}
 <script>
 const K='dafu-auction-v3';
 const ICO=n=>'<svg class="ic"><use href="#i-'+n+'"/></svg>';
-const openSettings=()=>{const m=$('settingsModal');m.hidden=false;document.body.style.overflow='hidden';};
+const syncBerserkUI=()=>{const b=$('berserkMode');if(b)b.checked=!!S.berserk;['zeroLimit','errLimit'].forEach(id=>{const el=$(id);if(el){el.disabled=!!S.berserk;el.style.opacity=S.berserk?'.45':'';el.title=S.berserk?'狂暴模式下锁定条目数设置':''}})};
+const openSettings=()=>{const m=$('settingsModal');syncBerserkUI();m.hidden=false;document.body.style.overflow='hidden';};
 const closeSettings=()=>{const m=$('settingsModal');m.hidden=true;document.body.style.overflow='';};
 
 const BASE=[['永恒之心','r',120],['古旧手提箱','r',40],['储钱小哼','r',40],['烟云盏','r',40],['未知门禁卡','r',20],['白龙王','r',20],['曜目权柄','r',10],['酷辣辣辣条','r',10],['一簇幽火','r',10],['九格小食','r',10],['便携式折叠屏','r',10],['永生花环','r',10],['乔望尼金雕像','g',10],['大饼','g',10]];
-const S={total:null,purple:null,mult:8,pick:{},custom:[],cap:200,pct:80,flip:0,tier:1,v:2,mode:0,avg:null,dp:2,gf:10,tl:500,f0:null,newG:[],gpick:{},au:1,sortMode:'diff-asc',inferSeconds:3,minGoldCount:1,unknownR:0,zeroLimit:0,errLimit:0};
+const S={total:null,purple:null,mult:8,pick:{},custom:[],cap:200,pct:80,flip:0,tier:1,v:2,mode:0,avg:null,dp:2,gf:10,tl:500,f0:null,newG:[],gpick:{},goldHistory:[],au:1,sortMode:'diff-asc',inferSeconds:3,minGoldCount:1,unknownR:0,zeroLimit:0,errLimit:0,berserk:false};
 let cc='r';
 try{const o=JSON.parse(localStorage.getItem(K)||'{}');
  if(Number.isInteger(o.total)&&o.total>=0)S.total=o.total;
@@ -402,6 +492,7 @@ try{const o=JSON.parse(localStorage.getItem(K)||'{}');
  if(o.flip===1)S.flip=1;
  if([0,1,2].includes(o.tier))S.tier=o.tier;
  if(o.mode===1)S.mode=1;
+  if(o.berserk===true)S.berserk=true;
  if(o.au===1&&typeof o.avg==="number"&&o.avg>=0)S.avg=o.avg;
  if(o.gpick&&typeof o.gpick==="object")Object.keys(o.gpick).forEach(k=>{const q=o.gpick[k];if(Number.isInteger(q)&&q>0)S.gpick[k]=Math.min(q,3)});
  if(Number.isInteger(o.dp)&&o.dp>=2&&o.dp<=4)S.dp=o.dp;
@@ -413,6 +504,30 @@ try{const o=JSON.parse(localStorage.getItem(K)||'{}');
  else if(o.pick&&typeof o.pick==='object')Object.keys(o.pick).forEach(k=>{const q=o.pick[k];if(Number.isInteger(q)&&q>0)S.pick[k]=Math.min(q,99)});
  if(Array.isArray(o.custom))S.custom=o.custom.filter(c=>Array.isArray(c)&&typeof c[0]==='string'&&(c[1]==='r'||c[1]==='g')&&Number.isFinite(c[2]));}catch(e){}
 const $=id=>document.getElementById(id);
+let __dafuSnapshot={schemaVersion:1};
+function __dafuPublish(data){
+  __dafuSnapshot=Object.assign({schemaVersion:1,updatedAt:Date.now()},data||{});
+  try{if(window.Native&&typeof Native.publishAuctionData==='function')Native.publishAuctionData(JSON.stringify(__dafuSnapshot));}catch(e){}
+  return __dafuSnapshot;
+}
+window.DafuAPI={
+  getSnapshot:()=>Object.assign({},__dafuSnapshot),
+  refresh:()=>__dafuPublish({
+    totalCount:Number.isFinite(S.total)?S.total:null,
+    purpleCount:Number.isFinite(S.purple)?S.purple:null,
+    goldRedCount:Number.isFinite(S.total)&&Number.isFinite(S.purple)?S.total-S.purple:null,
+    goldAverageInstrument:Number.isFinite(S.avg)?S.avg:null,
+    valuationWan:$('est')?.textContent==='—'?null:Number($('est')?.textContent),
+    valuationFull:$('full')?.textContent==='—'?null:Number($('full')?.textContent),
+    suggestedBidWan:$('bidv')?.textContent==='—'?null:Number.parseFloat($('bidv')?.textContent),
+    suggestedBidTier:$('tn')?.textContent||null,
+    seenBonusWan:$('add')?.textContent==='—'?null:Number($('add')?.textContent),
+    goldSeen:Object.entries(S.gpick||{}).map(([name,count])=>({name,count})),
+    mode:S.avg!==null?'gold-average':'standard'
+  }),
+  getNativeSnapshot:()=>{try{return window.Native?.getAuctionData?.()||null}catch(e){return null}}
+};
+
 const num=v=>{const x=parseInt(v,10);return Number.isFinite(x)&&x>=0?x:null};
 const all=()=>BASE.concat(S.custom);
 const Q=n=>Object.prototype.hasOwnProperty.call(S.pick,n)?S.pick[n]:0;
@@ -435,92 +550,141 @@ function ui(){
 }
 const PR=[['乔望尼金雕像',271827],['大饼',202798],['罐装随心泥',124816],['金龙鱼',111111],['赤色来电',101554],['条纹椰',101537],['琉璃尾',101403],['片刻驻足',88888],['双颈玉瓶-白',80754],['名为显赫的权杖',77777],['映像机',76591],['青花花瓶',62456],['澄空之眼',60285],['算力面包',60040],['万有星仪',51077],['灿金环',38316],['巡哨-干练精英',37558],['莓果总汇奶油长棍面包',30452],['浅绯祈手办',30264],['海盐心迷宫',30211],['「强身好伙伴！」',27246],['轮椅模型',27159],['絮语之种',22336],['心猎铁骑L3-以当千',22297],['万花筒',21012],['缠枝花纹筷',20238],['凝华海露',19926],['「截云」',18288],['名为尊贵的冠冕',18193],['万能适配器',18031],['生春鞘',15309],['蓝焰火花塞',15108],['盈雪点翠',15037],['气象指南',15024],['黄釉雅器',13632],['骑士车贴',12164],['「方盒科技」电容笔',12116],['「方盒科技」充电宝',11981],['自由数据线',11974],['绯红宝石',9938],['猫丸秘制豚骨拉面',9040],['桂冠',7648],['大满贯手握',7610],['缄默花瓣',7547],['「方盒科技」智能手表',7500],['海星',5555],['第23页',5047],['光之方',5041],['落日珍珠',4975],['心猎铁骑L1-必杀一击',22847],['心猎铁骑L2-闪焰冲锋',22770]];
 const AP=()=>PR.concat(S.newG);let RES=null,SEL=-1;
-function mkRnd(seed){let x=seed>>>0;return()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296}}
-// 反推：每种金品最多叠加 3 件、至少 2 种金品组合、已加入的大金按原价固定计入；单位均为完整数字
-const BIG=150000;
-function tables(P,LO,HI,cap){
- const m=P.length,MX=[],MN=[];
- for(let i=m;i>=0;i--){
-  MX[i]=new Array(cap+1).fill(-Infinity);MN[i]=new Array(cap+1).fill(Infinity);
-  if(i===m){MX[i][0]=0;MN[i][0]=0;continue}
-  for(let r=0;r<=cap;r++)for(let c=LO[i];c<=HI[i]&&c<=r;c++){
-   const hi=MX[i+1][r-c],lo=MN[i+1][r-c];
-   if(hi>-Infinity&&hi+P[i]*c>MX[i][r])MX[i][r]=hi+P[i]*c;
-   if(lo<Infinity&&lo+P[i]*c<MN[i][r])MN[i][r]=lo+P[i]*c;
-  }
- }
- return [MX,MN];
-}
-let INFER_DEADLINE=Infinity;
-function pass(gr,A,P,ID,LO,HI,seed){
- const m=P.length,cap=Math.min(gr-(S.unknownR||0),60),F=LO.reduce((a,b)=>a+b,0),n0=Math.max(F,cap>=2?2:1,S.minGoldCount||1),tb=tables(P,LO,HI,Math.max(0,cap)),MX=tb[0],MN=tb[1],
-  rnd=mkRnd(20261022+seed),t0=performance.now(),per=[],WL=[0,20,100,500,3000,10000,30000,50000,100000,300000,Infinity];let found=false,zc=0,ec=0;const ZT=S.zeroLimit||Infinity,ET=S.errLimit||Infinity,PN=Math.min(400,Math.max(10,(S.zeroLimit||400)+(S.errLimit||400))),NC=PN>10?250000:8000;
- for(let n=n0;n<=cap&&performance.now()<INFER_DEADLINE&&(zc<ZT||ec<ET);n++){
-  const T=n*A,sols=[],seen=new Set(),cnt=new Array(m).fill(0),dl=t0+(S.inferSeconds||5)*900*(n-n0+1)/Math.max(1,cap-n0+1);
-  let nodes=0,w=0;
-  const rec=(i,r,sum)=>{
-   if(sols.length>=PN||nodes>NC||performance.now()>=INFER_DEADLINE)return;
-   if(sum+MX[i][r]<T-w||sum+MN[i][r]>T+w)return;
-   if(r===0){
-    let k=0,key='';for(let x=0;x<m;x++)if(cnt[x]){k++;key+=x+':'+cnt[x]+','}
-    const e=sum-T;
-    if(k>=2&&n>=(S.minGoldCount||1)&&Math.abs(e)<=w&&!seen.has(key)){seen.add(key);const c=[];for(let x=0;x<m;x++)for(let z=0;z<cnt[x];z++)c.push(ID[x]);sols.push({n:n,k:k,e:e,sum:sum,c:c,key:n+'|'+key})}
-    return;
+// ===== 反推核心：纯函数，不碰页面变量，原样放进 Web Worker 里跑，主线程不再卡 =====
+function makeCore(){
+ const BIG=150000;
+ function mkRnd(seed){let x=seed>>>0;return()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296}}
+ function tables(P,LO,HI,cap){
+  const m=P.length,MX=[],MN=[];
+  for(let i=m;i>=0;i--){
+   MX[i]=new Array(cap+1).fill(-Infinity);MN[i]=new Array(cap+1).fill(Infinity);
+   if(i===m){MX[i][0]=0;MN[i][0]=0;continue}
+   for(let r=0;r<=cap;r++)for(let c=LO[i];c<=HI[i]&&c<=r;c++){
+    const hi=MX[i+1][r-c],lo=MN[i+1][r-c];
+    if(hi>-Infinity&&hi+P[i]*c>MX[i][r])MX[i][r]=hi+P[i]*c;
+    if(lo<Infinity&&lo+P[i]*c<MN[i][r])MN[i][r]=lo+P[i]*c;
    }
-   if(i>=m)return;
-   if(++nodes%128===0&&found&&performance.now()>dl)nodes=1e9;
-   const o=[];for(let c=LO[i];c<=HI[i]&&c<=r;c++)o.push(c);
-   for(let x=o.length-1;x>0;x--){const y=Math.floor(rnd()*(x+1)),t=o[x];o[x]=o[y];o[y]=t}
-   for(const c of o){cnt[i]=c;rec(i+1,r-c,sum+P[i]*c)}
-   cnt[i]=0;
-  };
-  for(const wa of WL){if(performance.now()>=INFER_DEADLINE||(found&&performance.now()>dl))break;w=n*wa;nodes=0;rec(0,n,0);if(sols.length&&(sols.length>=PN||wa>=3000))break}
-  if(sols.length)found=true;
-  zc+=sols.filter(r=>r.e===0).length;ec+=sols.filter(r=>r.e!==0).length;
-  per.push(sols);
+  }
+  return [MX,MN];
  }
- return per;
+ function pass(gr,A,P,ID,LO,HI,seed,cfg,DL){
+  const m=P.length,cap=Math.min(gr-cfg.ur,60),F=LO.reduce((a,b)=>a+b,0),n0=Math.max(F,cap>=2?2:1,cfg.mg),tb=tables(P,LO,HI,Math.max(0,cap)),MX=tb[0],MN=tb[1],
+   rnd=mkRnd(20261022+seed),t0=performance.now(),per=[],WL=[0,20,100,500,3000,10000,30000,50000,100000,300000,Infinity],
+   ZT=cfg.berserk?Infinity:(cfg.zl||600),ET=cfg.berserk?Infinity:(cfg.el||600),PN=cfg.berserk?5000:Math.min(400,Math.max(10,(cfg.zl||400)+(cfg.el||400))),NC=cfg.berserk?2000000:(PN>10?250000:8000);
+  let found=false,zc=0,ec=0,stop=false;
+  for(let n=n0;n<=cap&&!stop&&performance.now()<DL&&(zc<ZT||ec<ET);n++){
+   const T=n*A,sols=[],seen=new Set(),cnt=new Array(m).fill(0),dl=t0+cfg.sec*900*(n-n0+1)/Math.max(1,cap-n0+1);
+   let nodes=0,w=0;
+   const rec=(i,r,sum)=>{
+    if(stop||sols.length>=PN||nodes>NC)return;
+    if(sum+MX[i][r]<T-w||sum+MN[i][r]>T+w)return;
+    if(r===0){
+     let k=0,key='';for(let x=0;x<m;x++)if(cnt[x]){k++;key+=x+':'+cnt[x]+','}
+     const e=sum-T;
+     if(k>=2&&n>=cfg.mg&&Math.abs(e)<=w&&!seen.has(key)){seen.add(key);const c=[];for(let x=0;x<m;x++)for(let z=0;z<cnt[x];z++)c.push(ID[x]);sols.push({n:n,k:k,e:e,sum:sum,c:c,key:n+'|'+key})}
+     return;
+    }
+    if(i>=m)return;
+    if((++nodes&63)===0){const t=performance.now();if(t>=DL){stop=true;return}if(found&&t>dl)nodes=1e9}
+    const o=[];for(let c=LO[i];c<=HI[i]&&c<=r;c++)o.push(c);
+    for(let x=o.length-1;x>0;x--){const y=Math.floor(rnd()*(x+1)),t=o[x];o[x]=o[y];o[y]=t}
+    for(const c of o){cnt[i]=c;rec(i+1,r-c,sum+P[i]*c)}
+    cnt[i]=0;
+   };
+   for(const wa of WL){if(stop||performance.now()>=DL||(found&&performance.now()>dl))break;w=n*wa;nodes=0;rec(0,n,0);if(sols.length&&(sols.length>=PN||wa>=3000))break}
+   if(sols.length)found=true;
+   zc+=sols.filter(r=>r.e===0).length;ec+=sols.filter(r=>r.e!==0).length;
+   per.push(sols);
+  }
+  return per;
+ }
+ // 套用「均价计算器」的规则：组合均价 = 总价 ÷ 件数，与读数比较，相差最小的排前面，相差一样则件数少的在前
+ function infer(gr,A,L,cfg){
+  const DL=performance.now()+cfg.sec*1000; // 硬截止：到点立刻带着已找到的方案返回
+  const srt=L.map((x,i)=>[x[1],i]).sort((a,b)=>b[0]-a[0]),P=srt.map(x=>x[0]),ID=srt.map(x=>x[1]);
+  const LO=ID.map(j=>Math.min(3,cfg.gp[L[j][0]]||0)),F=LO.reduce((a,b)=>a+b,0),cap=Math.min(gr-cfg.ur,60);
+  if(F>cap)return {c:[],msg:'已加入的大金或未知红数量与金红数冲突，请核对。'};
+  if(cap<Math.max(F,cfg.mg,1))return {c:[],msg:'未知红已记录 '+cfg.ur+' 件，但可用金红数不足以组成符合条件的方案，请核对数量。'};
+  const H=b=>LO.map((lo,x)=>Math.max(lo,P[x]>=BIG?b:3));
+  let per=pass(gr,A,P,ID,LO,H(0),0,cfg,DL);
+  const tot=per.reduce((a,l)=>a+l.length,0);
+  if(tot<4&&performance.now()<DL){
+   const p2=pass(gr,A,P,ID,LO,H(1),7,cfg,DL);
+   per=p2.map((l,i)=>{const have=new Set((per[i]||[]).map(r=>r.key));return (per[i]||[]).concat(l.filter(r=>!have.has(r.key)))});
+  }
+  const ae=r=>Math.abs(r.e)/r.n,cmp=(a,b)=>ae(a)-ae(b)||a.n-b.n,best=[],rest=[];
+  per.forEach(l=>{l.sort(cmp);if(l[0])best.push(l[0]);for(let i=1;i<l.length;i++)rest.push(l[i])});
+  best.sort(cmp);rest.sort(cmp);
+  let c=best.concat(rest);c.sort(cmp);
+  // 「不限」也设上限：各最多保留 600 条，够用又不拖慢页面
+  let z=0,e=0;c=c.filter(r=>cfg.berserk?true:(r.e===0?(cfg.zl?true:++z<=600):(cfg.el?true:++e<=600)));
+  c.forEach((r,i)=>{r.id=i});
+  return {c:c,msg:c.some(r=>r.e===0)?'已找到总差为 0 的精确方案，已优先排在前面。':'本次限时搜索未找到总差为 0 的精确方案；以下为已找到的近似方案。'};
+ }
+ return infer;
+}
+const coreInfer=makeCore();
+const WSRC='const infer=('+makeCore.toString()+')();onmessage=function(e){var d=e.data;postMessage({id:d.id,res:infer(d.gr,d.A,d.L,d.cfg)})}';
+let WK,WID=0,WTO=0,CALC=false,RV=0,BUSY=false;
+function killWorker(){if(WK){try{WK.terminate()}catch(e){}WK=undefined}clearTimeout(WTO);BUSY=false}
+function cancelCalc(){killWorker();WID++;CALC=false}
+function getWorker(){
+ if(WK!==undefined)return WK;
+ try{WK=new Worker(URL.createObjectURL(new Blob([WSRC],{type:'text/javascript'})))}catch(e){WK=false}
+ return WK;
 }
 const gsig=()=>Object.keys(S.gpick).sort().map(k=>k+'*'+S.gpick[k]).join(',');
 const rkey=(gr,A)=>gr+'|'+A+'|'+AP().length+'|'+gsig()+'|UR'+S.unknownR;
-// 套用「均价计算器」的规则：组合均价 = 总价 ÷ 件数，与读数比较，相差最小的排前面，相差一样则件数少的在前
-function infer(gr,A){
- INFER_DEADLINE=performance.now()+(S.inferSeconds||5)*1000;
- const L=AP(),srt=L.map((x,i)=>[x[1],i]).sort((a,b)=>b[0]-a[0]),P=srt.map(x=>x[0]),ID=srt.map(x=>x[1]);
- const LO=ID.map(j=>Math.min(3,S.gpick[L[j][0]]||0)),F=LO.reduce((a,b)=>a+b,0),cap=Math.min(gr-(S.unknownR||0),60);
- if(F>cap)return {c:[],ex:false,L:L,A:A,key:rkey(gr,A),msg:'已加入的大金或未知红数量与金红数冲突，请核对。'};
- if(cap<Math.max(F,S.minGoldCount||1,1))return {c:[],ex:false,L:L,A:A,key:rkey(gr,A),msg:'未知红已记录 '+S.unknownR+' 件，但可用金红数不足以组成符合条件的方案，请核对数量。'};
- const H=b=>LO.map((lo,x)=>Math.max(lo,P[x]>=BIG?b:3));
- let per=pass(gr,A,P,ID,LO,H(0),0);
- const tot=per.reduce((a,l)=>a+l.length,0);
- if(tot<4){
-  const p2=pass(gr,A,P,ID,LO,H(1),7);
-  per=p2.map((l,i)=>{const have=new Set((per[i]||[]).map(r=>r.key));return (per[i]||[]).concat(l.filter(r=>!have.has(r.key)))});
- }
- const ae=r=>Math.abs(r.e)/r.n,cmp=(a,b)=>ae(a)-ae(b)||a.n-b.n,best=[],rest=[];
- per.forEach(l=>{l.sort(cmp);if(l[0])best.push(l[0]);for(let i=1;i<l.length;i++)rest.push(l[i])});
- best.sort(cmp);rest.sort(cmp);
- const c=best.concat(rest);
- c.sort(cmp);c.forEach((r,i)=>{r.id=i});
- return {c:c,ex:c.length>0,zeroFound:c.some(r=>r.e===0),L:L,A:A,key:rkey(gr,A),msg:c.some(r=>r.e===0)?'已找到总差为 0 的精确方案，已优先排在前面。':'本次限时搜索未找到总差为 0 的精确方案；以下为已找到的近似方案。'};
+// 异步反推：放进 Worker，新请求来了就终止旧的；Worker 不可用时退回主线程（同样有硬截止）
+function inferAsync(gr,A){
+ return new Promise(res=>{
+  killWorker();
+  const L=AP(),id=++WID,key=rkey(gr,A),sec=S.inferSeconds||5,
+   cfg={ur:S.unknownR||0,mg:S.minGoldCount||1,zl:S.zeroLimit||0,el:S.errLimit||0,sec:sec,berserk:!!S.berserk,gp:Object.assign({},S.gpick)};
+  const fin=r=>{if(id!==WID)return;clearTimeout(WTO);BUSY=false;res(Object.assign(r,{L:L,A:A,key:key,ex:r.c.length>0,zeroFound:r.c.some(x=>x.e===0)}))};
+  const w=getWorker();
+  if(w){
+   BUSY=true;
+   w.onmessage=e=>{if(e.data.id===id)fin(e.data.res)};
+   w.onerror=()=>{killWorker();WK=false;if(id===WID)setTimeout(()=>fin(coreInfer(gr,A,L,cfg)),0)};
+   w.postMessage({id:id,gr:gr,A:A,L:L,cfg:cfg});
+   WTO=setTimeout(()=>{if(id!==WID)return;killWorker();fin({c:[],msg:'计算超时，请调低条目数或限时后重试。'})},sec*1000+3000);
+  }else setTimeout(()=>fin(coreInfer(gr,A,L,cfg)),20);
+ });
 }
 let AT=0;
 function autoCalc(now){
  clearTimeout(AT);
- if(S.mode!==1)return;
+ if(S.mode!==1){cancelCalc();return}
  const gr=(S.total!==null&&S.purple!==null)?S.total-S.purple:null;
- if(gr===null||gr<1||S.avg===null)return;
+ if(gr===null||gr<1||S.avg===null){cancelCalc();return}
  $('cm').textContent='计算中…';
- AT=setTimeout(()=>{const o=runCalc();$('cm').textContent=typeof o==='string'?o:'';update()},now?0:350);
+ AT=setTimeout(()=>{runCalc().then(o=>{$('cm').textContent=typeof o==='string'?o:'';update()});update()},now?0:350);
 }
 function runCalc(){
  const gr=(S.total!==null&&S.purple!==null)?S.total-S.purple:null;
- if(gr===null||gr<1||S.avg===null){RES=null;return false}
- RES=infer(gr,S.avg);SEL=-1;return RES.msg||true;
+ if(gr===null||gr<1||S.avg===null){cancelCalc();RES=null;return Promise.resolve(false)}
+ CALC=true;
+ return inferAsync(gr,S.avg).then(r=>{CALC=false;RES=r;RV++;SEL=-1;return r.msg||true});
 }
 const rng=a=>{const o=[];let i=0;while(i<a.length){let j=i;while(j+1<a.length&&a[j+1]===a[j]+1)j++;o.push(j>i?a[i]+'–'+a[j]:''+a[i]);i=j+1}return o.join('、')};
+let LZ=null,DRS='',GROUPS={};const CH=30;
+function fillSchemeGroup(key){const g=GROUPS[key];if(!g)return;const box=$('content-'+key);if(!box)return;const end=Math.min(g.items.length,g.shown+CH);for(let i=g.shown;i<end;i++){const item=g.items[i];box.insertAdjacentHTML('beforeend',g.render(item.r,item.label));}g.shown=end;let more=box.querySelector('.group-more');if(g.shown<g.items.length){if(!more){more=document.createElement('button');more.className='group-more';more.dataset.groupMore=key;box.appendChild(more)}more.textContent='再显示 '+Math.min(CH,g.items.length-g.shown)+' 条（还剩 '+(g.items.length-g.shown)+' 条）'}else if(more)more.remove();markSel();}
+function markSel(){document.querySelectorAll('#rtab [data-s]').forEach(b=>b.classList.toggle('on',+b.dataset.s===SEL))}
+function lzMore(k){
+ const z=LZ&&LZ[k];if(!z)return;
+ const box=$(k==='z'?'lzZ':'lzE'),btn=document.querySelector('#rtab [data-more="'+k+'"]');if(!box)return;
+ const a=z.d,b=Math.min(z.n,a+CH);
+ if(b>a){box.insertAdjacentHTML('beforeend',z.mk(a,b));z.d=b}
+ if(btn){btn.hidden=z.d>=z.n;btn.textContent='再显示 '+Math.min(CH,z.n-z.d)+' 条（还剩 '+(z.n-z.d)+' 条）'}
+ markSel();
+}
 function drawRes(rows,gr,add,m){
- if(!rows.length){$('rtab').innerHTML='<p class="hint">'+(RES?(RES.msg||'暂时没有可用的组合，请核对金红数和金均读数。'):'填好读数后点「开始计算」，这里会列出多种反推方案。')+'</p>';return}
+ // 输入没变（只是点选了某个方案、切了主题等）就不重画整张表，只更新高亮
+ const sig=[RV,RES?1:0,gr,add,m,S.zeroLimit,S.errLimit,rows.length,S.sortMode,CALC?1:0,gsig()].join('|');
+ if(sig===DRS){markSel();return}
+ DRS=sig;LZ=null;
+ if(!rows.length){$('rtab').innerHTML='<p class="hint">'+(RES?(RES.msg||'暂时没有可用的组合，请核对金红数和金均读数。'):(CALC?'计算中…最多 '+(S.inferSeconds||5)+' 秒'+(S.berserk?'（狂暴模式：持续搜索，不限条目数）':'，到点会直接给出已找到的结果。'):'填好读数后点「开始计算」，这里会列出多种反推方案。'))+'</p>';return}
  const L=RES.L,A=RES.A,raw=r=>r.sum/10000+(gr-r.n)*m+add,sg=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(1);
  const zeros=rows.filter(r=>r.e===0),others=rows.filter(r=>r.e!==0),baseRows=zeros.length?zeros:rows;
  const avgE=Math.round(baseRows.reduce((a,r)=>a+raw(r),0)/baseRows.length),avgF=Math.round(baseRows.reduce((a,r)=>a+raw(r),0)/baseRows.length*10000);
@@ -530,32 +694,45 @@ function drawRes(rows,gr,add,m){
  const pct=v=>rows.length?(v/rows.length*100).toFixed(0)+'%':'0%',coverage=useMap.length?(used/useMap.length*100).toFixed(0)+'%':'0%';
  let h='<div class="hint" style="padding:6px 9px;margin:4px 0;border-radius:7px;">'+(zeros.length?ICO('check')+' 共找到 '+zeros.length+' 个零误差子组合；总价值估算默认按这些零差组合计算。':ICO('info')+' 本次限时搜索未找到总差为 0 的方案；总价值估算暂按当前推算方案平均值计算。')+'</div>'+
  '<button class="rw ravg'+(SEL<0?' on':'')+'" data-s="-1"><b>默认总价值估算：'+avgE+' 万</b>（≈ '+avgF+'）<small>'+(zeros.length?'按全部 '+zeros.length+' 个零误差子组合取平均':'按 '+rows.length+' 组近似方案取平均')+'；点选下方任一方案可切换估算依据</small></button><div class="rscroll">';
- function comboButton(r,label,i){
+ function comboButton(r,label){
   const ct={};r.c.forEach(j=>{ct[j]=(ct[j]||0)+1});const av=r.sum/r.n;
   const names=Object.keys(ct).sort((a,b)=>L[b][1]-L[a][1]).map(j=>esc(L[j][0])+' '+L[j][1]+(ct[j]>1?' ×'+ct[j]:'')+(S.gpick[L[j][0]]?'（已加入）':'')).join(' + ');
   return '<button class="rw'+(SEL===r.id?' on':'')+'" data-s="'+r.id+'"><b>'+label+' · 估价 '+Math.round(raw(r))+' 万</b>（完整 '+Math.round(raw(r)*10000)+'）　金 '+r.n+' 件 · 红 '+(gr-r.n)+' 件<small>'+names+'<br>总价 '+r.sum+' ÷ '+r.n+' 件 = 组合均价 '+av.toFixed(1)+'；读数 '+A+'；误差 '+sg(av-A)+'（总差 '+sg(r.sum-r.n*A)+'）</small></button>';
  }
- if(zeros.length){
-  const ZL=S.zeroLimit||0,zs=ZL?zeros.slice(0,ZL):zeros,zr=zs.slice(3);h+='<div class="gh z">零误差方案（共 '+zeros.length+' 个'+(zs.length<zeros.length?'，按设置显示 '+zs.length:'')+'）</div><p class="schemehint">总差均为 0；总价值默认按全部零误差组合取平均。点选可切换估价依据。</p><div class="zgroup">'+zs.slice(0,3).map((r,i)=>comboButton(r,'子组合 '+(i+1),i)).join('')+'</div>'+(zr.length?'<details class="more"><summary>展开其余 '+zr.length+' 个零误差子组合</summary><div class="subcombo">'+zr.map((r,i)=>comboButton(r,'子组合 '+(i+4),i+3)).join('')+'</div></details>':'');
+ const ZL=S.zeroLimit||0,zs=ZL?zeros.slice(0,ZL):zeros;
+ const EL=S.errLimit||0,os=EL?others.slice(0,EL):others;
+ GROUPS={};let groupSeq=0;
+ const schemeLabel=n=>'方案'+(['一','二','三','四','五','六','七','八','九','十'][n-1]||n);
+ function groupedRemainder(arr,kind,offset){
+   const by={};arr.forEach((r,i)=>{(by[r.n]||(by[r.n]=[])).push({r,label:schemeLabel(offset+i+1)})});
+   return Object.keys(by).sort((a,b)=>Number(a)-Number(b)).map(n=>{const key='grp'+(groupSeq++),items=by[n];GROUPS[key]={items,shown:0,kind,render:(r,label)=>comboButton(r,label)};
+     return '<details class="scheme-group '+(kind==='zero'?'zero':'error')+'" data-group="'+key+'"><summary><span>金数 '+n+' 件 · 相同金数</span><span>'+items.length+' 个剩余方案　展开＋</span></summary><div class="group-content" id="content-'+key+'"></div></details>'
+   }).join('');
  }
- const EL=S.errLimit||0,os=EL?others.slice(0,EL):others;if(os.length)h+=(zeros.length?'<div class="sep"></div>':'')+'<div class="gh e">带误差方案（共 '+others.length+' 个'+(os.length<others.length?'，按设置显示 '+os.length:'')+'）</div>';os.forEach((r,i)=>{
-  const hue=Math.round(120*(1-(os.length<=1?0:i/(os.length-1))));
-  h+='<div class="scheme" style="border-left:4px solid hsl('+hue+',75%,42%)"><div style="font-weight:700;font-size:13px;line-height:1.45;padding:4px 2px">带误差 '+(i+1)+' · 估价 '+Math.round(raw(r))+' 万 · 总差 '+sg(r.e)+'</div><div class="subcombo">'+comboButton(r,'查看 / 选用此方案',i)+'</div></div>';
- });
+ function renderFirstThree(arr){return arr.slice(0,3).map((r,i)=>comboButton(r,schemeLabel(i+1))).join('')}
+ if(zeros.length){
+  const rest=zs.slice(3);
+  h+='<div class="gh z">零误差方案（共 '+zeros.length+' 个'+(zs.length<zeros.length?'，按设置显示 '+zs.length:'')+'）</div><p class="schemehint">先展示 3 个零误差方案；其余按相同金数归组，点开后查看各自独立的子组合。</p><div class="zgroup">'+renderFirstThree(zs)+(rest.length?groupedRemainder(rest,'zero',3):'')+'</div>';
+ }
+ if(os.length){const restE=os.slice(3);h+=(zeros.length?'<div class="sep"></div>':'')+'<div class="gh e">带误差方案（共 '+others.length+' 个'+(os.length<others.length?'，按设置显示 '+os.length:'')+'）</div><p class="schemehint">保留带误差方案；先展示 3 个，其余按相同金数归组，展开后仍可逐条查看误差和估价。</p>'+renderFirstThree(os)+(restE.length?groupedRemainder(restE,'error',3):'');}
  // 利用率表格放到所有方案的最后，避免影响主要估价流程
  h+='<section class="utilbox"><div class="utiltitle">'+ICO('chart')+' 金品利用率（基于当前找到的 '+rows.length+' 种方案）</div><div class="utilsummary"><div class="utilmetric"><b>'+used+'/'+useMap.length+'</b><span>被用到的金品</span></div><div class="utilmetric"><b>'+coverage+'</b><span>金品覆盖率</span></div><div class="utilmetric"><b>'+totalItems+'</b><span>方案中金品总件次</span></div></div><div class="utilhead"><span>金品名称 / 价格</span><span style="text-align:right">出现方案</span><span style="text-align:right">件次</span><span style="text-align:right">使用率</span></div><div class="utilrows">'+
  useMap.slice().sort((a,b)=>b.schemes-a.schemes||b.items-a.items||b.price-a.price).map(x=>'<div class="utilrow"><span class="un">'+esc(x.name)+'<br><span style="color:var(--mu)">'+x.price+'</span><div class="utilbar"><i style="width:'+pct(x.schemes)+'"></i></div></span><span class="num">'+x.schemes+'/'+rows.length+'</span><span class="num">'+x.items+'</span><span class="num">'+pct(x.schemes)+'</span></div>').join('')+'</div><p class="utilnote">使用率 = 含有该金品的方案数 ÷ 当前显示方案数；件次为这些方案里该金品出现的总次数。未出现不代表数学上无解，结果受限时搜索影响。</p></section>';
  h+='</div>';
- $('rtab').innerHTML=h; const sm=$('sortMode');if(sm)sm.value=S.sortMode;const it=$('inferSeconds');if(it)it.value=String(S.inferSeconds||5);const mg=$('minGoldCount');if(mg)mg.value=String(S.minGoldCount||1);
+ $('rtab').innerHTML=h;lzMore('e');
+ const sm=$('sortMode');if(sm)sm.value=S.sortMode;const it=$('inferSeconds');if(it)it.value=String(S.inferSeconds||5);const mg=$('minGoldCount');if(mg)mg.value=String(S.minGoldCount||1);
 }
+$('rtab').addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches('details.scheme-group')&&d.open&&GROUPS[d.dataset.group]&&GROUPS[d.dataset.group].shown===0)requestAnimationFrame(()=>fillSchemeGroup(d.dataset.group))},true);
+$('rtab').addEventListener('click',e=>{const b=e.target.closest('[data-group-more]');if(b){e.preventDefault();e.stopPropagation();fillSchemeGroup(b.dataset.groupMore)}});
+function recordGold(name,price){S.goldHistory=[[name,price],...S.goldHistory.filter(x=>x[0]!==name)].slice(0,5)}
 function drawNG(){
  $('ngn').innerHTML=S.newG.length?S.newG.map((x,i)=>'<li>'+esc(x[0])+' '+x[1]+' <button data-g="'+i+'" aria-label="删除" style="border:0;background:none;color:var(--mu);cursor:pointer">×</button></li>').join(''):'<li>暂无</li>';
  if(!$('ngo').firstChild)$('ngo').innerHTML=PR.map(x=>'<li>'+esc(x[0])+' '+x[1]+'</li>').join('');
+ $('ghistory').innerHTML=S.goldHistory.length?S.goldHistory.map(x=>'<li><span>'+esc(x[0])+' <b>'+x[1]+'</b></span><button class="gh-add" data-gh="'+esc(x[0])+'">＋ 再添加</button></li>').join(''):'<li>暂无添加记录</li>'; 
  const L=AP(),sel=Object.keys(S.gpick).filter(k=>L.some(x=>x[0]===k));
  Object.keys(S.gpick).forEach(k=>{if(!sel.includes(k))delete S.gpick[k]});
  $('gsel').innerHTML=sel.length?sel.map(k=>{const it=L.find(x=>x[0]===k),n=esc(k);return '<li class="on">'+n+' '+it[1]+' <button class="gb" data-gn="'+n+'" data-gd="-1" aria-label="减少">'+ICO('minus')+'</button><b>'+S.gpick[k]+'</b><button class="gb" data-gn="'+n+'" data-gd="1" aria-label="增加">'+ICO('plus')+'</button><button class="gb" data-gn="'+n+'" data-gx="1" aria-label="移除">'+ICO('x')+'</button></li>'}).join(''):'<li>还没有加入</li>';
  const cn=sel.reduce((a,k)=>a+S.gpick[k],0);
- $('gsum').innerHTML=ICO('sparkle')+' 所见大金 / 新金藏品（已加入 '+cn+' 件，点击展开）';
  drawGoldRes();
 }
 function drawGoldRes(){
@@ -572,7 +749,7 @@ function addNG(){
  if(d){$('nm').textContent='重复：「'+d[0]+'」已在'+(PR.includes(d)?'过往':'新增')+'金藏品里。';return}
  const q=AP().find(x=>x[1]===p);
  if(q){$('nm').textContent='价格与「'+q[0]+'」完全相同，疑似重复，请核对。';return}
- S.newG.push([n,p]);if(S.mode===1)runCalc();$('nn').value='';$('np').value='';$('nm').textContent='';save();update();
+ S.newG.push([n,p]);recordGold(n,p);$('nn').value='';$('np').value='';$('nm').textContent='';save();update();autoCalc(true);
 }
 function update(){
  ui();
@@ -616,6 +793,21 @@ function update(){
  $('chips').innerHTML=[8,10].map(x=>'<button class="chip'+(m===x?' on':'')+'" data-m="'+x+'">×'+x+'</button>').join('');
  drawItems();drawRes(rows,gr,add,m);drawNG();
  drawFluct(E);
+ __dafuPublish({
+  totalCount:S.total,
+  purpleCount:S.purple,
+  goldRedCount:gr,
+  purpleCounter:S.purple,
+  goldAverageInstrument:S.avg,
+  valuationWan:E,
+  valuationFull:v1?Math.round((base+add)*10000):null,
+  suggestedBidWan:$('bidv').textContent==='—'?null:Number.parseFloat($('bidv').textContent),
+  suggestedBidTier:$('tn').textContent,
+  seenBonusWan:add,
+  seenBigItems:pk.map(i=>({name:i[0],kind:i[1],count:Q(i[0]),bonusWan:i[2]})),
+  goldSeen:Object.entries(S.gpick||{}).map(([name,count])=>({name,count})),
+  mode:m1?'gold-average':'standard'
+ });
  if(BO)fillBar();
 }
 const TN=['保守','稳妥','激进'];
@@ -652,13 +844,21 @@ function addItem(){
 $('gf0').addEventListener('input',e=>{S.f0=+e.target.value;save();update()});
 $('sortMode').addEventListener('change',e=>{S.sortMode=['price-desc','price-asc','diff-desc','diff-asc'].includes(e.target.value)?e.target.value:'diff-asc';save();update()});
 $('inferSeconds').addEventListener('change',e=>{S.inferSeconds=[3,5,8,10,15].includes(+e.target.value)?+e.target.value:5;save()});
+$('berserkMode').addEventListener('change',e=>{
+ if(e.target.checked){
+  const ok=confirm('⚠️ 狂暴模式警告\n\n将忽略零误差/带误差条目数上限，并在设定的计算限时内尽可能继续搜索。结果可能非常多，设备可能发热、耗电或出现卡顿；低性能设备不建议开启。\n\n确定开启狂暴模式？');
+  if(!ok){e.target.checked=false;return}
+  S.berserk=true;
+ }else{S.berserk=false}
+ save();syncBerserkUI();update();autoCalc(true);
+});
 
 $('openSettings').addEventListener('click',()=>{const it=$('inferSeconds');const mg=$('minGoldCount');if(it)it.value=String(S.inferSeconds||5);if(mg)mg.value=String(S.minGoldCount||1);openSettings()});
 $('settingsClose').addEventListener('click',closeSettings);
 $('settingsModal').addEventListener('click',e=>{if(e.target===$('settingsModal'))closeSettings()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('settingsModal').hidden)closeSettings()});
 
-$('minGoldCount').addEventListener('change',e=>{S.minGoldCount=Math.max(1,Math.min(10,parseInt(e.target.value,10)||1));save();if(S.mode===1&&S.avg!==null)runCalc();else update()});
+$('minGoldCount').addEventListener('change',e=>{S.minGoldCount=Math.max(1,Math.min(10,parseInt(e.target.value,10)||1));save();update();autoCalc(true)});
 $('avg').addEventListener('input',e=>{const x=parseFloat(e.target.value);S.avg=Number.isFinite(x)&&x>=0?x:null;save();update();autoCalc()});
 $('gq').addEventListener('input',drawGoldRes);
 $('gf').addEventListener('input',e=>{S.gf=+e.target.value;save();update()});
@@ -678,29 +878,33 @@ document.addEventListener('click',e=>{
  else if(t.id==='nok'){try{localStorage.setItem('dafu-notice','1')}catch(x){}$('notice').hidden=true;return}
  else if(t.id==='go'){addItem();return}
  else if(t.id==='ng'){addNG();return}
- else if(t.id==='calc'){t.textContent='计算中…';t.disabled=true;setTimeout(()=>{const o=runCalc();t.disabled=false;t.textContent='立即计算';$('cm').textContent=o===true?'':(typeof o==='string'?o:'请先填好紫金红总数、紫件计数器（金红数至少为 1）和金均。');update()},30);return}
+ else if(t.id==='calc'){clearTimeout(AT);t.textContent='计算中…';t.disabled=true;CALC=true;update();setTimeout(()=>{runCalc().then(o=>{t.disabled=false;t.textContent='立即计算';$('cm').textContent=o===true?'':(typeof o==='string'?o:'请先填好紫金红总数、紫件计数器（金红数至少为 1）和金均。');update()})},30);return}
  else if(d.s!==undefined){SEL=+d.s}
  else if(d.g!==undefined){const g=S.newG[+d.g];if(g)delete S.gpick[g[0]];S.newG.splice(+d.g,1);auto=true}
- else if(d.ga!==undefined){if(!S.gpick[d.ga])S.gpick[d.ga]=1;auto=true}
+ else if(d.ga!==undefined){if(!S.gpick[d.ga])S.gpick[d.ga]=1;const rec=AP().find(x=>x[0]===d.ga);if(rec)recordGold(rec[0],rec[1]);auto=true}
+ else if(d.gh!==undefined){const rec=AP().find(x=>x[0]===d.gh);if(rec){if(!S.gpick[rec[0]])S.gpick[rec[0]]=1;recordGold(rec[0],rec[1]);auto=true}}
  else if(d.gx!==undefined){delete S.gpick[d.gn];auto=true}
  else if(d.gd!==undefined){const q=(S.gpick[d.gn]||0)+parseInt(d.gd,10);if(q>0)S.gpick[d.gn]=Math.min(q,3);else delete S.gpick[d.gn];auto=true}
  else if(d.ur!==undefined){S.unknownR=d.ur==='0'?0:Math.max(0,Math.min(99,(S.unknownR||0)+parseInt(d.ur,10)));auto=true}
- else if(d.r!==undefined){clearTimeout(AT);S.total=null;S.purple=null;S.pick={};S.gpick={};S.unknownR=0;S.mult=8;S.avg=null;RES=null;SEL=-1;S.f0=null;sync();}
+ else if(d.r!==undefined){clearTimeout(AT);S.total=null;S.purple=null;S.pick={};S.gpick={};S.unknownR=0;S.mult=8;S.avg=null;cancelCalc();RES=null;SEL=-1;S.f0=null;sync();}
  else return;
  if(auto&&S.mode===1&&(d.k||d.md!==undefined)){save();update();autoCalc();return}
- if(auto&&S.mode===1){const o=runCalc();$('cm').textContent=typeof o==='string'?o:''}
+ if(auto&&S.mode===1){save();update();autoCalc(true);return}
  save();update();
 });
 let BO=false,BT='pr';
+const GOLDSEC=$('goldTools'),GOLDHOME=document.createElement('span');GOLDHOME.hidden=true;GOLDSEC.before(GOLDHOME);
+function placeGold(){const mobile=matchMedia('(max-width: 899px)').matches;if(mobile){if(GOLDSEC.parentNode!==$('bsGold'))$('bsGold').appendChild(GOLDSEC)}else if(GOLDSEC.parentNode!==GOLDHOME.parentNode)GOLDHOME.after(GOLDSEC)}
+placeGold();window.addEventListener('resize',placeGold);
 const RPE=document.querySelector('.result-panel'),RPP=RPE.parentNode;
 const FLS=$('chart').closest('section'),FHm=document.createElement('span');FHm.hidden=true;FLS.before(FHm);
-function placeRp(){const bd=BO&&BT==='bd',rt=BO&&BT==='rt'&&S.mode===1;
+function placeRp(){placeGold();const bd=BO&&BT==='bd',rt=BO&&BT==='rt'&&S.mode===1;
  if(bd){if(FLS.parentNode!==$('bsBd'))$('bsBd').appendChild(FLS)}else if(FLS.parentNode!==FHm.parentNode)FHm.after(FLS);
  if(rt){if(RPE.parentNode!==$('bsRt'))$('bsRt').appendChild(RPE)}else if(RPE.parentNode!==RPP)RPP.appendChild(RPE)}
 function barTab(t,dir){if(t==='rt'&&S.mode!==1)t='bd';const prev=BT;BT=t;
  document.querySelectorAll('[data-bt]').forEach(b=>b.classList.toggle('on',b.dataset.bt===t));
- [['pr','bsPr'],['bd','bsBd'],['rt','bsRt']].forEach(x=>{$(x[1]).hidden=x[0]!==t});
- if(dir&&prev!==t){const el=$({pr:'bsPr',bd:'bsBd',rt:'bsRt'}[t]);el.classList.remove('sinR','sinL');void el.offsetWidth;el.classList.add(dir>0?'sinR':'sinL')}
+ [['pr','bsPr'],['gold','bsGold'],['bd','bsBd'],['rt','bsRt']].forEach(x=>{$(x[1]).hidden=x[0]!==t});
+ if(dir&&prev!==t){const el=$({pr:'bsPr',gold:'bsGold',bd:'bsBd',rt:'bsRt'}[t]);el.classList.remove('sinR','sinL');void el.offsetWidth;el.classList.add(dir>0?'sinR':'sinL')}
  placeRp();fillBar()}
 function barOpen(o){BO=o;$('barBody').hidden=!o;$('barScrim').hidden=!o;$('barHead').setAttribute('aria-expanded',o);$('barPk').setAttribute('aria-expanded',o);$('bar').classList.toggle('open',o);if(o)barTab(BT);else placeRp()}
 function fillBar(){
@@ -718,9 +922,9 @@ function fillBar(){
 $('barHead').addEventListener('click',()=>barOpen(!BO));
 $('barPk').addEventListener('click',()=>barOpen(!BO));
 $('barScrim').addEventListener('click',()=>barOpen(false));
-document.querySelectorAll('[data-bt]').forEach(b=>b.addEventListener('click',()=>barTab(b.dataset.bt,['pr','bd','rt'].indexOf(b.dataset.bt)>['pr','bd','rt'].indexOf(BT)?1:-1)));
+document.querySelectorAll('[data-bt]').forEach(b=>b.addEventListener('click',()=>{const order=['pr','gold','bd','rt'];barTab(b.dataset.bt,order.indexOf(b.dataset.bt)>order.indexOf(BT)?1:-1)}));
 (function(){const bd=$('barBody');let x0=0,y0=0,on=false,moved=false;
-function go(d){const order=S.mode===1?['pr','bd','rt']:['pr','bd'],i=order.indexOf(BT)+d;if(i<0||i>=order.length)return;barTab(order[i],d)}
+function go(d){const order=S.mode===1?['pr','gold','bd','rt']:['pr','gold','bd'],i=order.indexOf(BT)+d;if(i<0||i>=order.length)return;barTab(order[i],d)}
 bd.addEventListener('pointerdown',e=>{if(e.target.closest('input,select,textarea'))return;x0=e.clientX;y0=e.clientY;on=true;moved=false});
 bd.addEventListener('pointermove',e=>{if(!on)return;const dx=e.clientX-x0,dy=e.clientY-y0;if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.4)moved=true});
 bd.addEventListener('pointerup',e=>{if(!on)return;on=false;const dx=e.clientX-x0,dy=e.clientY-y0;if(moved&&Math.abs(dx)>48&&Math.abs(dx)>Math.abs(dy)*1.4)go(dx<0?1:-1)});
@@ -739,16 +943,39 @@ const openLog=()=>{$('logModal').hidden=false;document.body.style.overflow='hidd
 $('openLog').addEventListener('click',openLog);$('logClose').addEventListener('click',closeLog);
 $('logModal').addEventListener('click',e=>{if(e.target===$('logModal'))closeLog()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('logModal').hidden)closeLog()});
-$('openSettings2').addEventListener('click',()=>$('openSettings').click());const ss=$('screenStatus'),si=$('screenItems');
-$('enableScreenAssist').addEventListener('click',()=>Native.openAccessibilitySettings());
-$('refreshScreen').addEventListener('click',()=>{try{const d=JSON.parse(Native.readScreen());si.innerHTML='';if(!d.enabled){ss.textContent='尚未授权，请在系统无障碍设置中启用服务';return;}ss.textContent='读取到 '+d.items.length+' 个控件';d.items.forEach((x,i)=>{const b=document.createElement('button');b.className='settings-trigger';b.textContent=(x.text||'无文字控件')+(x.clickable?' · 可点击':'');b.onclick=()=>{if(confirm('确认执行一次点击？'))ss.textContent=Native.clickScreenItem(i)?'点击已执行':'点击失败，请重新读取';};si.appendChild(b);});}catch(e){ss.textContent='读取失败：'+e.message;}});
-$('toggleOverlay').addEventListener('click',()=>{Native.setOverlayEnabled(true);ss.textContent='已请求开启悬浮窗';});
-$('assistBid').checked=localStorage.getItem('dafu-auto-bid-assist')==='1';
-$('assistBid').addEventListener('change',e=>localStorage.setItem('dafu-auto-bid-assist',e.target.checked?'1':'0'));
+$('openSettings2').addEventListener('click',()=>$('openSettings').click());
+const __ss=$('screenStatus'),__si=$('screenItems');
+$('enableScreenAssist')?.addEventListener('click',()=>Native.openAccessibilitySettings());
+$('refreshScreen')?.addEventListener('click',()=>{
+ try{const d=JSON.parse(Native.readScreen());__si.innerHTML='';
+ if(!d.enabled){__ss.textContent='尚未授权，请在系统无障碍设置中启用达芙屏幕辅助';return;}
+ __ss.textContent='读取到 '+(d.items||[]).length+' 个可访问控件';
+ (d.items||[]).forEach((x,i)=>{const b=document.createElement('button');b.className='settings-trigger';b.textContent=(x.text||'无文字控件')+(x.clickable?' · 可点击':'');b.addEventListener('click',()=>{if(confirm('确认对该控件执行一次点击？'))__ss.textContent=Native.clickScreenItem(i)?'已执行一次点击':'点击失败，请重新读取屏幕';});__si.appendChild(b);});
+ }catch(e){__ss.textContent='读取失败：'+e.message;}
+});
+$('toggleOverlay')?.addEventListener('click',()=>Native.setOverlayEnabled(true));
+if($('assistBid')){$('assistBid').checked=localStorage.getItem('dafu-auto-bid-assist')==='1';$('assistBid').addEventListener('change',e=>localStorage.setItem('dafu-auto-bid-assist',e.target.checked?'1':'0'));}
 
 $('openSettings').addEventListener('click',()=>{$('zeroLimit').value=String(S.zeroLimit||0);$('errLimit').value=String(S.errLimit||0)});
-['zeroLimit','errLimit'].forEach(k=>{const el=$(k);el.innerHTML=[3,5,8,10,15,20,30,50,100,300,0].map(v=>'<option value="'+v+'">'+(v?v+' 条':'不限（搜到计算限时结束，可达几百条以上）')+'</option>').join('');el.value=String(S[k]||0);el.addEventListener('change',e=>{S[k]=+e.target.value;save();update()})});
+['zeroLimit','errLimit'].forEach(k=>{const el=$(k);el.innerHTML=[3,5,8,10,15,20,30,50,100,300,0].map(v=>'<option value="'+v+'">'+(v?v+' 条':'不限（普通模式各最多 600 条）')+'</option>').join('');el.value=String(S[k]||0);el.addEventListener('change',e=>{if(S.berserk){e.target.value=String(S[k]||0);return}S[k]=+e.target.value;save();update();autoCalc(true)})});
+syncBerserkUI();
 if(S.total===null)$('total').focus();
+
+(function(){const r=document.documentElement;let scheduled=false;
+function isFloat(){
+ const iw=window.innerWidth||document.documentElement.clientWidth,ih=window.innerHeight||document.documentElement.clientHeight;
+ const sw=screen.availWidth||screen.width||iw,sh=screen.availHeight||screen.height||ih;
+ const touch=matchMedia('(pointer:coarse)').matches;
+ if(!touch)return iw<=360||ih<=420;
+ const minR=Math.min(iw,ih)/Math.max(1,Math.min(sw,sh)),maxR=Math.max(iw,ih)/Math.max(1,Math.max(sw,sh));
+ return minR<0.85||maxR<0.62||iw<=380||ih<=430;
+}
+function apply(){scheduled=false;const a=document.activeElement,typing=a&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName);if(typing)return;r.classList.toggle('mini',isFloat())}
+function queue(){if(scheduled)return;scheduled=true;requestAnimationFrame(apply)}
+document.addEventListener('focusout',()=>setTimeout(queue,250));
+window.addEventListener('resize',queue,{passive:true});window.addEventListener('orientationchange',()=>setTimeout(queue,180),{passive:true});
+if(window.visualViewport)window.visualViewport.addEventListener('resize',queue,{passive:true});
+apply();})();
 </script>
 </body>
 </html>
