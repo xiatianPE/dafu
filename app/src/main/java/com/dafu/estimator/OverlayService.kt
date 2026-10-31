@@ -77,7 +77,7 @@ class OverlayService : Service() {
     }
     private fun refreshContent(){
         val raw=Store.get("dafu-auction-live")
-        if(raw!=null)try{val d=JSONObject(raw);valueText?.text="当前估价：\${format(d.optDouble("valuationWan",Double.NaN))}\n建议出价：\${format(d.optDouble("suggestedBidWan",Double.NaN))}"}catch(_:Exception){}
+        if(raw!=null)try{val d=JSONObject(raw);valueText?.text="当前估价："+format(d.optDouble("valuationWan",Double.NaN))+"\n建议出价："+format(d.optDouble("suggestedBidWan",Double.NaN))}catch(_:Exception){}
         if(expanded)refreshLogs()
     }
     private fun refreshLogs(){logText?.text=NativeLog.snapshot(8).joinToString("\n").ifBlank{"暂无运行日志"}}
