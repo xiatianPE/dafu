@@ -13,6 +13,8 @@
         android:label="达芙估价"
         android:theme="@style/AppTheme">
 
+        <activity android:name=".NativeControlActivity" android:exported="false" android:label="识别与出价" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden|uiMode"
