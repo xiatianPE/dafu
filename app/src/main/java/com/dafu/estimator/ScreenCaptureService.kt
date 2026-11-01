@@ -101,9 +101,12 @@ class ScreenCaptureService : Service() {
     }
 
     private fun processLatestImage(source: ImageReader) {
+        val image = try { source.acquireLatestImage() } catch (_: Exception) { null } ?: return
         val now = System.currentTimeMillis()
-        if (now - lastProcessAt < 1000 || !processing.compareAndSet(false, true)) return
-        val image = source.acquireLatestImage() ?: run { processing.set(false); return }
+        if (now - lastProcessAt < 1000 || !processing.compareAndSet(false, true)) {
+            image.close()
+            return
+        }
         lastProcessAt = now
         try {
             val bitmap = imageToBitmap(image)
