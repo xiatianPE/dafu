@@ -109,16 +109,22 @@ class ScreenCaptureService : Service() {
         }
         lastProcessAt = now
         try {
-            val bitmap = imageToBitmap(image)
+            val fullBitmap = imageToBitmap(image)
             image.close()
+            // These three intelligence cards are drawn in the center panel. Restrict OCR
+            // to that region to avoid unrelated inventory/button text confusing matching.
+            val left = (fullBitmap.width * 0.25f).toInt().coerceAtLeast(0)
+            val top = (fullBitmap.height * 0.12f).toInt().coerceAtLeast(0)
+            val right = (fullBitmap.width * 0.75f).toInt().coerceAtMost(fullBitmap.width)
+            val bottom = (fullBitmap.height * 0.74f).toInt().coerceAtMost(fullBitmap.height)
+            val bitmap = Bitmap.createBitmap(fullBitmap, left, top, right - left, bottom - top)
+            fullBitmap.recycle()
             val input = InputImage.fromBitmap(bitmap, 0)
             recognizer.process(input)
                 .addOnSuccessListener { text ->
                     val parsed = ScreenRecognition.parse(text, bitmap.width, bitmap.height)
                     latestJson = parsed.toString()
-                    val round = parsed.opt("round").toString()
-                    val cardCount = parsed.optJSONArray("intelCards")?.length() ?: 0
-                    NativeLog.add("OCR识别：回合=$round，情报卡=$cardCount，置信度=${parsed.optString("confidence")}")
+                    NativeLog.add("OCR情报识别：${parsed.optInt("detectedCount")}/${parsed.optInt("expectedCount")}，状态=${parsed.optString("status")}，缺失=${parsed.optJSONArray("missingTargets")}")
                     Store.set("dafu-screen-recognition", latestJson)
                 }
                 .addOnFailureListener { e ->
