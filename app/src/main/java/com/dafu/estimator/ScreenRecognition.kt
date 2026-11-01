@@ -7,11 +7,18 @@ import com.google.mlkit.vision.text.Text
 import java.util.Locale
 
 /**
- * Parses the auction UI from Chinese OCR. OCR can split one visual phrase into
- * several lines/blocks, so matching is done on both original lines and a
- * whitespace-free normalized string. Never trigger actions from this result.
+ * Focused recognition for the three requested auction intelligence items only.
+ * OCR text is whitespace-normalized so titles split across lines can still match.
  */
 object ScreenRecognition {
+    private data class Target(val title: String, val type: String, val aliases: List<String>)
+
+    private val targets = listOf(
+        Target("千眼其一", "auction_info", listOf("千眼其一")),
+        Target("紫品计数仪器", "purple_count", listOf("紫品计数仪器", "紫品计数仪器")),
+        Target("金品均价仪器", "gold_average", listOf("金品均价仪器", "金品均价仪器"))
+    )
+
     fun parse(text: Text, width: Int, height: Int): JSONObject {
         val lines = mutableListOf<JSONObject>()
         val all = mutableListOf<Pair<String, Rect>>()
@@ -25,82 +32,68 @@ object ScreenRecognition {
                         .put("text", value)
                         .put("left", box.left).put("top", box.top)
                         .put("right", box.right).put("bottom", box.bottom)
-                        .put("cx", (box.left + box.right) / 2)
-                        .put("cy", (box.top + box.bottom) / 2)
+                        .put("cx", box.centerX()).put("cy", box.centerY())
                 }
             }
         }
 
         val raw = all.joinToString("\n") { it.first }
         val normalized = normalize(raw)
-        val roundRegex = Regex("竞拍第([0-9一二两三四五六七八九十]+)回合")
-        val roundMatch = roundRegex.find(normalized)
-        val round = roundMatch?.groupValues?.getOrNull(1)?.let(::toRound)
-
-        // Match known cards against the full screen text, not a single OCR line.
-        // ML Kit often splits a title such as “金品均价仪器” into multiple lines.
-        val cardDefs = listOf(
-            Triple("拍卖师公开情报", "public_info", listOf("拍卖师公开情报", "拍卖师公开情报")),
-            Triple("千眼其一", "auction_info", listOf("千眼其一", "千眼其一")),
-            Triple("紫品计数仪器", "purple_count", listOf("紫品计数仪器", "紫品计数仪器")),
-            Triple("金品均价仪器", "gold_average", listOf("金品均价仪器", "金品均价仪器"))
-        )
         val cards = JSONArray()
-        for ((title, type, variants) in cardDefs) {
-            if (variants.any { normalized.contains(normalize(it)) }) {
-                val anchor = all.firstOrNull { normalize(it.first).contains(normalize(title)) }
+        val matchedTypes = mutableListOf<String>()
+
+        for (target in targets) {
+            val matchedAlias = target.aliases.firstOrNull { normalized.contains(normalize(it)) }
+            if (matchedAlias != null) {
+                matchedTypes += target.type
+                val titleNorm = normalize(matchedAlias)
+                val anchor = all.firstOrNull { normalize(it.first).contains(titleNorm) }
                 val y = anchor?.second?.centerY() ?: -1
-                val desc = if (anchor != null) {
-                    all.filter { (_, box) -> box.centerX() in (width * 0.25f).toInt()..(width * 0.75f).toInt() &&
-                        kotlin.math.abs(box.centerY() - y) < height * 0.12 }
-                        .joinToString(" ") { it.first }
+                // Keep a small local text excerpt for diagnostics only; matching is based on title.
+                val description = if (anchor != null) {
+                    all.filter { (_, box) ->
+                        box.centerX() in (width * 0.25f).toInt()..(width * 0.75f).toInt() &&
+                            kotlin.math.abs(box.centerY() - y) < height * 0.07
+                    }.joinToString(" ") { it.first }
                 } else ""
-                cards.put(JSONObject().put("title", title).put("description", desc)
-                    .put("y", y).put("type", type))
+                cards.put(JSONObject()
+                    .put("title", target.title)
+                    .put("type", target.type)
+                    .put("detected", true)
+                    .put("description", description)
+                    .put("y", y))
             }
         }
 
-        val normalizedLines = all.map { normalize(it.first) }
-        val hasConfirm = normalized.contains("确认出价")
-        val hasClear = normalized.contains("清空")
-        val hasPrevious = normalized.contains("上轮出价")
-        val keypad = hasConfirm && (hasClear || hasPrevious)
-        val giveUp = normalized.contains("放弃")
-        // On the normal auction screen, the bottom-right “出价” is a button.
-        // During keypad entry, “确认出价” is a separate control.
-        val bid = !keypad && normalizedLines.any { it == "出价" || it.contains("出价") } &&
-            !normalized.contains("输入你愿意出的价格")
-        val amounts = JSONArray()
-        val amountRegex = Regex("(当前估价|推荐出价参考|可输入范围|愿意出的价格)[:：]?([0-9][0-9,，.万]*)")
-        for (m in amountRegex.findAll(normalized)) {
-            amounts.put(JSONObject().put("label", m.groupValues[1]).put("value", m.groupValues[2].replace(",", "").replace("，", "")))
-        }
+        val missing = JSONArray()
+        for (target in targets) if (target.type !in matchedTypes) missing.put(target.title)
 
-        val confidence = when {
-            round != null && cards.length() > 0 && (bid || giveUp || keypad) -> "high"
-            round != null || cards.length() > 0 || bid || giveUp || keypad -> "medium"
-            all.isNotEmpty() -> "low"
-            else -> "none"
-        }
         return JSONObject()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("source", "screen_ocr")
-            .put("status", if (all.isEmpty()) "no_text_detected" else "recognized")
-            .put("screenWidth", width).put("screenHeight", height)
-            .put("round", round ?: JSONObject.NULL)
-            .put("roundText", roundMatch?.value ?: "")
+            .put("status", when {
+                all.isEmpty() -> "no_text_detected"
+                cards.length() == targets.size -> "all_three_detected"
+                cards.length() > 0 -> "partial_detection"
+                else -> "none_of_three_detected"
+            })
+            .put("screenWidth", width)
+            .put("screenHeight", height)
             .put("intelCards", cards)
-            .put("bidButtonVisible", bid)
-            .put("giveUpButtonVisible", giveUp)
-            .put("bidKeyboardVisible", keypad)
-            .put("confirmBidButtonVisible", hasConfirm)
-            .put("amounts", amounts)
+            .put("detectedCount", cards.length())
+            .put("expectedCount", targets.size)
+            .put("missingTargets", missing)
             .put("rawText", raw)
             .put("normalizedText", normalized)
             .put("lineCount", all.size)
             .put("lines", lines)
             .put("capturedAt", System.currentTimeMillis())
-            .put("confidence", confidence)
+            .put("confidence", when {
+                cards.length() == targets.size -> "high"
+                cards.length() > 0 -> "medium"
+                all.isNotEmpty() -> "low"
+                else -> "none"
+            })
     }
 
     private fun normalize(value: String): String = value
@@ -108,13 +101,4 @@ object ScreenRecognition {
         .replace('臺', '台')
         .replace('兩', '两')
         .lowercase(Locale.ROOT)
-
-    private fun toRound(value: String): Int? {
-        value.toIntOrNull()?.let { return it }
-        return when (value) {
-            "一" -> 1; "二", "两" -> 2; "三" -> 3; "四" -> 4; "五" -> 5
-            "六" -> 6; "七" -> 7; "八" -> 8; "九" -> 9; "十" -> 10
-            else -> null
-        }
-    }
 }
