@@ -31,4 +31,6 @@ android {
 
 dependencies {
     implementation("androidx.webkit:webkit:1.11.0")
+    // Bundled Chinese OCR model: works offline after installation.
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
 }
