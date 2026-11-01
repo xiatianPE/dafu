@@ -16,6 +16,9 @@ class Bridge(private val context:Context){
  @JavascriptInterface fun openAccessibilitySettings(){context.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))}
  @JavascriptInterface fun openNativeControlPanel(){context.startActivity(Intent(context,NativeControlActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))}
  @JavascriptInterface fun readScreen():String=ScreenAssistService.snapshotJson()
+ @JavascriptInterface fun startScreenCapture(){ScreenCaptureActivity.launch(context)}
+ @JavascriptInterface fun getScreenRecognition():String=ScreenCaptureService.latestJson
+ @JavascriptInterface fun stopScreenCapture(){context.stopService(Intent(context,ScreenCaptureService::class.java))}
  @JavascriptInterface fun clickScreenItem(index:Int):Boolean=ScreenAssistService.clickItem(index)
  @JavascriptInterface fun setOverlayEnabled(enabled:Boolean):String{
   if(!enabled){context.stopService(Intent(context,OverlayService::class.java));return "stopped"}
