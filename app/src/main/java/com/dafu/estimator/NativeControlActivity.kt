@@ -222,14 +222,15 @@ class NativeControlActivity : Activity() {
                 val cardText = (0 until (cards?.length() ?: 0)).mapNotNull { i ->
                     cards?.optJSONObject(i)?.let { "• " + it.optString("title") + if (it.optString("description").isNotBlank()) "： " + it.optString("description") else "" }
                 }.joinToString("\n")
-                val round = if (o.isNull("round")) "未识别" else "第" + o.optString("round") + "回合"
-                recognitionView.text = "状态：" + o.optString("status", if (ScreenCaptureService.running) "识别中" else "未启动") +
-                    "\n回合：" + round +
-                    "\n出价按钮：" + (if (o.optBoolean("bidButtonVisible")) "可见" else "未确认") +
-                    "\n放弃按钮：" + (if (o.optBoolean("giveUpButtonVisible")) "可见" else "未确认") +
-                    "\n数字键盘：" + (if (o.optBoolean("bidKeyboardVisible")) "可见" else "未确认") +
-                    "\n置信度：" + o.optString("confidence", "—") +
-                    "\n情报：" + (if (cardText.isBlank()) "尚未识别到情报卡" else "\n" + cardText) +
+                val missing = o.optJSONArray("missingTargets")
+                val missingText = if (missing == null || missing.length() == 0) "无" else
+                    (0 until missing.length()).joinToString("、") { missing.optString(it) }
+                recognitionView.text = "识别状态：" + o.optString("status", if (ScreenCaptureService.running) "识别中" else "未启动") +
+                    "\n识别数量：" + o.optInt("detectedCount") + "/" + o.optInt("expectedCount", 3) +
+                    "\n千眼其一：" + if (o.optJSONArray("intelCards")?.toString()?.contains("auction_info") == true) "已识别" else "未识别" +
+                    "\n紫品计数仪器：" + if (o.optJSONArray("intelCards")?.toString()?.contains("purple_count") == true) "已识别" else "未识别" +
+                    "\n金品均价仪器：" + if (o.optJSONArray("intelCards")?.toString()?.contains("gold_average") == true) "已识别" else "未识别" +
+                    "\n缺失项目：" + missingText +
                     "\n原始文字：" + o.optString("rawText", "").take(500)
             } catch (_: Exception) { recognitionView.text = "等待屏幕 OCR 授权或识别结果…" }
         }
