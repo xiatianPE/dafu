@@ -59,7 +59,7 @@ object ScreenRecognition {
         val amountPattern = Regex("(?:当前估价|推荐出价参考|可输入范围|愿意出的价格)[：:]?\\s*([0-9][0-9,，.万]*)")
         val amounts = JSONArray()
         for (m in amountPattern.findAll(joined)) {
-            amounts.put(JSONObject().put("label", m.groupValues[0].substringBefore(Regex("[:：]")))
+            amounts.put(JSONObject().put("label", m.groupValues[0].replace(Regex("[:：].*"), ""))
                 .put("value", m.groupValues[1].replace(",", "").replace("，", "")))
         }
         return JSONObject()
