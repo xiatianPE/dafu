@@ -44,6 +44,7 @@ class NativeControlActivity : Activity() {
     private lateinit var estimate: TextView
     private lateinit var suggested: TextView
     private lateinit var logView: TextView
+    private lateinit var recognitionView: TextView
     private lateinit var maxBid: EditText
 
     private val handler = Handler(Looper.getMainLooper())
@@ -118,13 +119,28 @@ class NativeControlActivity : Activity() {
         body.addView(statusCard, space(0, 10, 0, 12))
 
         val openAcc = button("开启屏幕识别", 0) { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
-        val readScreen = button("读取屏幕", 1) {
+        val readScreen = button("读取无障碍节点", 0) {
             val raw = ScreenAssistService.snapshotJson()
             val count = try { JSONObject(raw).optJSONArray("items")?.length() ?: 0 } catch (_: Exception) { 0 }
             NativeLog.add("手动读取屏幕：获取到 $count 个节点")
             Toast.makeText(this, "读取到 $count 个可访问节点", Toast.LENGTH_SHORT).show()
         }
-        body.addView(buttonRow(openAcc, readScreen), space(0, 0, 0, 24))
+        body.addView(buttonRow(openAcc, readScreen), space(0, 0, 0, 8))
+        val startOcr = button("开启屏幕 OCR", 1) {
+            ScreenCaptureActivity.launch(this)
+            Toast.makeText(this, "请允许屏幕共享；游戏画面会在本机离线识别", Toast.LENGTH_LONG).show()
+        }
+        val stopOcr = button("停止 OCR", 0) {
+            stopService(Intent(this, ScreenCaptureService::class.java))
+            NativeLog.add("用户停止屏幕 OCR")
+        }
+        body.addView(buttonRow(startOcr, stopOcr), space(0, 0, 0, 14))
+        body.addView(sectionTitle("屏幕识别结果", "回合、中央情报、出价按钮与数字键盘"))
+        val recognitionCard = cardBox()
+        recognitionView = label("等待屏幕 OCR…", 12f, mutedColor)
+        recognitionView.setLineSpacing(dp(3).toFloat(), 1f)
+        recognitionCard.addView(recognitionView)
+        body.addView(recognitionCard, space(0, 8, 0, 24))
 
         // ---------- 当前估价 ----------
         body.addView(sectionTitle("当前估价", "由网页估价器实时同步"))
@@ -199,6 +215,24 @@ class NativeControlActivity : Activity() {
 
     // ================= 数据刷新 =================
     private fun refreshData() {
+        if (::recognitionView.isInitialized) {
+            try {
+                val o = JSONObject(ScreenCaptureService.latestJson)
+                val cards = o.optJSONArray("intelCards")
+                val cardText = (0 until (cards?.length() ?: 0)).mapNotNull { i ->
+                    cards?.optJSONObject(i)?.let { "• " + it.optString("title") + if (it.optString("description").isNotBlank()) "： " + it.optString("description") else "" }
+                }.joinToString("\n")
+                val round = if (o.isNull("round")) "未识别" else "第" + o.optString("round") + "回合"
+                recognitionView.text = "状态：" + o.optString("status", if (ScreenCaptureService.running) "识别中" else "未启动") +
+                    "\n回合：" + round +
+                    "\n出价按钮：" + (if (o.optBoolean("bidButtonVisible")) "可见" else "未确认") +
+                    "\n放弃按钮：" + (if (o.optBoolean("giveUpButtonVisible")) "可见" else "未确认") +
+                    "\n数字键盘：" + (if (o.optBoolean("bidKeyboardVisible")) "可见" else "未确认") +
+                    "\n置信度：" + o.optString("confidence", "—") +
+                    "\n情报：" + (if (cardText.isBlank()) "尚未识别到情报卡" else "\n" + cardText) +
+                    "\n原始文字：" + o.optString("rawText", "").take(500)
+            } catch (_: Exception) { recognitionView.text = "等待屏幕 OCR 授权或识别结果…" }
+        }
         val raw = Store.get("dafu-auction-live") ?: return
         try {
             val o = JSONObject(raw)
