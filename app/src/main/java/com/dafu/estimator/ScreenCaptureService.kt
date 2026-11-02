@@ -130,15 +130,9 @@ class ScreenCaptureService : Service() {
         try {
             val fullBitmap = imageToBitmap(image)
             image.close()
-            // These three intelligence cards are drawn in the center panel. Restrict OCR
-            // to that region to avoid unrelated inventory/button text confusing matching.
-            val left = (fullBitmap.width * 0.25f).toInt().coerceAtLeast(0)
-            val top = (fullBitmap.height * 0.12f).toInt().coerceAtLeast(0)
-            val right = (fullBitmap.width * 0.75f).toInt().coerceAtMost(fullBitmap.width)
-            // Include the complete third (gold-average) intelligence card and its value line.
-            val bottom = (fullBitmap.height * 0.90f).toInt().coerceAtMost(fullBitmap.height)
-            val bitmap = Bitmap.createBitmap(fullBitmap, left, top, right - left, bottom - top)
-            fullBitmap.recycle()
+            // Diagnostic-first mode: OCR the entire captured display.
+            // ScreenRecognition still extracts only the three requested intelligence cards.
+            val bitmap = fullBitmap
             val input = InputImage.fromBitmap(bitmap, 0)
             recognizer.process(input)
                 .addOnSuccessListener { text ->
