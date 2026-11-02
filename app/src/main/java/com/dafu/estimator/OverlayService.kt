@@ -56,9 +56,37 @@ class OverlayService : Service() {
             background=GradientDrawable().apply{setColor(0xF2FFFFFF.toInt());cornerRadius=dp(16).toFloat();setStroke(dp(1),0xFFDCDFEE.toInt())}
             elevation=dp(9).toFloat()
         }
-        root.addView(TextView(this).apply{text="达芙估价器";textSize=12f;setTextColor(0xFF666C90.toInt());typeface=Typeface.DEFAULT_BOLD})
+        val header=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL;gravity=Gravity.CENTER_VERTICAL}
+        header.addView(TextView(this).apply{text="达芙估价器";textSize=12f;setTextColor(0xFF666C90.toInt());typeface=Typeface.DEFAULT_BOLD},LinearLayout.LayoutParams(0,-2,1f))
+        val close=TextView(this).apply{
+            text="×";textSize=22f;gravity=Gravity.CENTER;setTextColor(0xFFB42318.toInt())
+            background=GradientDrawable().apply{setColor(0xFFFFEEEE.toInt());cornerRadius=dp(9).toFloat()}
+            setOnClickListener{NativeLog.add("用户点击悬浮窗关闭");stopSelf()}
+        }
+        header.addView(close,LinearLayout.LayoutParams(dp(30),dp(30)))
+        root.addView(header)
         valueText=TextView(this).apply{text="当前估价：等待数据\n建议出价：等待数据";textSize=15f;setTextColor(0xFF1A1E35.toInt());typeface=Typeface.DEFAULT_BOLD;setPadding(0,dp(5),0,dp(7))}
         root.addView(valueText)
+        val actions=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL;gravity=Gravity.CENTER_VERTICAL}
+        val recognize=TextView(this).apply{
+            text="手动识别屏幕";textSize=12f;gravity=Gravity.CENTER;setTextColor(Color.WHITE)
+            background=GradientDrawable().apply{setColor(0xFFD99A14.toInt());cornerRadius=dp(9).toFloat()}
+            setPadding(dp(10),dp(8),dp(10),dp(8))
+            setOnClickListener{
+                if(ScreenCaptureService.running){
+                    val request=Intent(this@OverlayService,ScreenCaptureService::class.java).setAction(ScreenCaptureService.ACTION_RECOGNIZE_NOW)
+                    try{
+                        if(Build.VERSION.SDK_INT>=26)startForegroundService(request) else startService(request)
+                        NativeLog.add("悬浮窗请求立即识别屏幕")
+                    }catch(e:Exception){NativeLog.add("手动识别请求失败："+(e.message?:e.javaClass.simpleName))}
+                }else{
+                    NativeLog.add("手动识别：屏幕 OCR 尚未启动，打开授权")
+                    try{ScreenCaptureActivity.launch(this@OverlayService)}catch(e:Exception){NativeLog.add("无法打开屏幕授权："+(e.message?:e.javaClass.simpleName))}
+                }
+            }
+        }
+        actions.addView(recognize,LinearLayout.LayoutParams(-1,dp(36)))
+        root.addView(actions,LinearLayout.LayoutParams(-1,-2).apply{bottomMargin=dp(5)})
         val logToggle=TextView(this).apply{text="运行日志  ▾";textSize=12f;setTextColor(0xFF8A6A2E.toInt());gravity=Gravity.END;setPadding(0,dp(4),0,dp(2));setOnClickListener{toggleLogs()}}
         root.addView(logToggle)
         logArea=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;visibility=View.GONE;setPadding(dp(8),dp(7),dp(8),dp(7));background=GradientDrawable().apply{setColor(0xFFF2F3F9.toInt());cornerRadius=dp(9).toFloat()}}
