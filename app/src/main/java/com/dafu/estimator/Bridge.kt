@@ -154,8 +154,7 @@ class Bridge(
     @JavascriptInterface
     fun setGameMaxRounds(rounds: Int): Boolean {
         if (rounds !in 0..100) return false
-        val tracker = objectInstance("com.dafu.estimator.GameTracker") ?: return false
-        tracker.javaClass.getField("maxRounds").setInt(tracker, rounds)
+        if (invokeObject("com.dafu.estimator.GameTracker", "setMaxRounds", arrayOf(Int::class.javaPrimitiveType!!), arrayOf(rounds)) == null) return false
         NativeLog.add("游戏总回合数设置为：${if (rounds == 0) "自动判断" else rounds}")
         return true
     }
@@ -174,7 +173,7 @@ class Bridge(
         val tracker = objectInstance("com.dafu.estimator.GameTracker")
         val round = (invokeObject("com.dafu.estimator.GameTracker", "currentRound") as? Int) ?: 0
         val ended = (invokeObject("com.dafu.estimator.GameTracker", "isGameOver") as? Boolean) ?: false
-        val max = try { tracker?.javaClass?.getField("maxRounds")?.getInt(tracker) ?: 0 } catch (_: Exception) { 0 }
+        val max = (invokeObject("com.dafu.estimator.GameTracker", "getMaxRounds") as? Int) ?: 0
         return JSONObject().put("round", round).put("isGameOver", ended)
             .put("maxRounds", max).put("game", game).toString()
     }
@@ -244,12 +243,14 @@ class Bridge(
         methodName: String,
         parameterTypes: Array<Class<*>> = emptyArray(),
         args: Array<Any?> = emptyArray()
-    ): Any? = try {
-        val instance = objectInstance(className) ?: return null
-        instance.javaClass.getMethod(methodName, *parameterTypes).invoke(instance, *args)
-    } catch (e: Exception) {
-        NativeLog.add("原生接口调用失败：$methodName")
-        null
+    ): Any? {
+        return try {
+            val instance = objectInstance(className) ?: return null
+            instance.javaClass.getMethod(methodName, *parameterTypes).invoke(instance, *args)
+        } catch (e: Exception) {
+            NativeLog.add("原生接口调用失败：$methodName")
+            null
+        }
     }
 
     // ---- native -> web event channel ----
