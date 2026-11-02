@@ -55,11 +55,14 @@ object ScreenRecognition {
             val nextY = anchors.drop(index + 1).firstNotNullOfOrNull { it.second?.box?.centerY() }
                 ?: height
             // Numeric text must be below this card's title and before the next card title.
+            // Exclude the left-side floating window: MediaProjection can capture our own
+            // overlay, whose stale number (e.g. 16) was being mistaken for game-card data.
+            // The three game intelligence cards occupy the central panel in this layout.
             val descriptionLines = ordered.filter { line ->
-                line.box.centerY() >= anchorY - 2 &&
+                line.box.centerY() >= anchor.box.bottom - 1 &&
                     line.box.centerY() < nextY &&
                     line.box.centerY() <= anchorY + height * 0.24f &&
-                    line.box.centerX() in (width * 0.12f).toInt()..(width * 0.90f).toInt()
+                    line.box.centerX() in (width * 0.32f).toInt()..(width * 0.70f).toInt()
             }
             val description = descriptionLines.joinToString(" ") { it.text }
             val number = Regex("(?<![A-Za-z])([0-9][0-9,]*(?:\\.[0-9]+)?)")
