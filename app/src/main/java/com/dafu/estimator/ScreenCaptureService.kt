@@ -96,8 +96,14 @@ class ScreenCaptureService : Service() {
         val n = Notification.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_stat)
             .setContentTitle("达芙屏幕识别").setContentText("正在识别当前拍卖画面")
             .setOngoing(true).build()
-        if (Build.VERSION.SDK_INT >= 34) startForeground(22, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
-        else startForeground(22, n)
+        // A service launched with startForegroundService() must enter foreground promptly.
+        // Creating the notification channel alone is not enough; without this call Android
+        // may stop the capture service before the first OCR frame is processed.
+        if (Build.VERSION.SDK_INT >= 34) {
+            startForeground(22, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
+        } else {
+            startForeground(22, n)
+        }
     }
 
     private fun processLatestImage(source: ImageReader) {
