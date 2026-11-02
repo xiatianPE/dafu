@@ -29,6 +29,10 @@ class Bridge(
 
     private val main = Handler(Looper.getMainLooper())
 
+    init {
+        NativeEventBus.register { name, json -> emit(name, json) }
+    }
+
     fun bindWebView(webView: WebView) {
         webRef = WeakReference(webView)
     }
@@ -170,7 +174,6 @@ class Bridge(
         val frame = try { JSONObject(ScreenCaptureService.latestJson) }
         catch (_: Exception) { JSONObject() }
         val game = frame.optJSONObject("game") ?: JSONObject()
-        val tracker = objectInstance("com.dafu.estimator.GameTracker")
         val round = (invokeObject("com.dafu.estimator.GameTracker", "currentRound") as? Int) ?: 0
         val ended = (invokeObject("com.dafu.estimator.GameTracker", "isGameOver") as? Boolean) ?: false
         val max = (invokeObject("com.dafu.estimator.GameTracker", "getMaxRounds") as? Int) ?: 0
