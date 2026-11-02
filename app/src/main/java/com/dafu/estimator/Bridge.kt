@@ -206,6 +206,17 @@ class Bridge(
     @JavascriptInterface
     fun isOverlayRunning(): Boolean = OverlayService.running
 
+
+    @JavascriptInterface
+    fun getNativeStatus(): String = JSONObject()
+        .put("accessibilityEnabled", ScreenAssistService.isEnabled(context))
+        .put("accessibilityConnected", ScreenAssistService.isConnected())
+        .put("screenCaptureRunning", ScreenCaptureService.running)
+        .put("overlayRunning", OverlayService.running)
+        .put("autoBid", JSONObject(getAutoBidStatus()))
+        .put("game", JSONObject(getGameState()))
+        .toString()
+
     // ---- logs ----
     @JavascriptInterface
     fun getNativeLogs(limit: Int): String {
