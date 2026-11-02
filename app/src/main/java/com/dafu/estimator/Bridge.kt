@@ -95,9 +95,7 @@ class Bridge(
 
     @JavascriptInterface
     fun stopScreenCapture() {
-        context.stopService(Intent(context, ScreenCaptureService::class.java).apply {
-            action = "STOP"
-        })
+        context.stopService(Intent(context, ScreenCaptureService::class.java))
     }
 
     @JavascriptInterface
@@ -121,12 +119,12 @@ class Bridge(
 
     @JavascriptInterface
     fun cancelAutoBid() {
-        AutoBidder.cancel()
+        invokeObject("com.dafu.estimator.AutoBidder", "cancel")
     }
 
     @JavascriptInterface
     fun getAutoBidStatus(): String =
-        AutoBidder.statusJson()
+        (invokeObject("com.dafu.estimator.AutoBidder", "statusJson") as? String) ?: JSONObject().put("state", "UNAVAILABLE").put("message", "自动出价模块尚未接入").toString()
 
     private fun requestAutoBidInternal(
         price: Long,
@@ -145,21 +143,26 @@ class Bridge(
             NativeLog.add("自动出价请求失败：请先启动屏幕识别")
             return false
         }
-        return AutoBidder.request(price, submit, requireVerify)
+        return (invokeObject(
+            "com.dafu.estimator.AutoBidder", "request",
+            arrayOf(Long::class.javaPrimitiveType!!, Boolean::class.javaPrimitiveType!!, Boolean::class.javaPrimitiveType!!),
+            arrayOf(price, submit, requireVerify)
+        ) as? Boolean) == true
     }
 
     // ---- game state ----
     @JavascriptInterface
     fun setGameMaxRounds(rounds: Int): Boolean {
         if (rounds !in 0..100) return false
-        GameTracker.maxRounds = rounds
+        val tracker = objectInstance("com.dafu.estimator.GameTracker") ?: return false
+        tracker.javaClass.getField("maxRounds").setInt(tracker, rounds)
         NativeLog.add("游戏总回合数设置为：${if (rounds == 0) "自动判断" else rounds}")
         return true
     }
 
     @JavascriptInterface
     fun resetGameTracker() {
-        GameTracker.reset()
+        invokeObject("com.dafu.estimator.GameTracker", "reset")
         NativeLog.add("已重置本局游戏状态")
     }
 
@@ -168,12 +171,12 @@ class Bridge(
         val frame = try { JSONObject(ScreenCaptureService.latestJson) }
         catch (_: Exception) { JSONObject() }
         val game = frame.optJSONObject("game") ?: JSONObject()
-        return JSONObject()
-            .put("round", GameTracker.currentRound())
-            .put("isGameOver", GameTracker.isGameOver())
-            .put("maxRounds", GameTracker.maxRounds)
-            .put("game", game)
-            .toString()
+        val tracker = objectInstance("com.dafu.estimator.GameTracker")
+        val round = (invokeObject("com.dafu.estimator.GameTracker", "currentRound") as? Int) ?: 0
+        val ended = (invokeObject("com.dafu.estimator.GameTracker", "isGameOver") as? Boolean) ?: false
+        val max = try { tracker?.javaClass?.getField("maxRounds")?.getInt(tracker) ?: 0 } catch (_: Exception) { 0 }
+        return JSONObject().put("round", round).put("isGameOver", ended)
+            .put("maxRounds", max).put("game", game).toString()
     }
 
     // ---- overlay ----
@@ -230,6 +233,24 @@ class Bridge(
 
     @JavascriptInterface
     fun getAuctionData(): String = auctionData
+
+
+    private fun objectInstance(className: String): Any? = try {
+        Class.forName(className).getField("INSTANCE").get(null)
+    } catch (_: Exception) { null }
+
+    private fun invokeObject(
+        className: String,
+        methodName: String,
+        parameterTypes: Array<Class<*>> = emptyArray(),
+        args: Array<Any?> = emptyArray()
+    ): Any? = try {
+        val instance = objectInstance(className) ?: return null
+        instance.javaClass.getMethod(methodName, *parameterTypes).invoke(instance, *args)
+    } catch (e: Exception) {
+        NativeLog.add("原生接口调用失败：$methodName")
+        null
+    }
 
     // ---- native -> web event channel ----
     fun emit(name: String, json: String = "{}") {
