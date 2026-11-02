@@ -27,6 +27,7 @@ class ScreenCaptureService : Service() {
     companion object {
         const val EXTRA_RESULT_CODE = "result_code"
         const val EXTRA_RESULT_DATA = "result_data"
+        const val ACTION_RECOGNIZE_NOW = "com.dafu.estimator.RECOGNIZE_NOW"
         private const val CHANNEL = "dafu_screen_ocr"
         @Volatile var running = false
         @Volatile var latestJson = JSONObject().put("status", "not_started").toString()
@@ -61,6 +62,18 @@ class ScreenCaptureService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == "STOP") { stopSelf(); return START_NOT_STICKY }
+        if (intent?.action == ACTION_RECOGNIZE_NOW) {
+            handler?.post {
+                val activeReader=reader
+                if(activeReader!=null && running){
+                    processLatestImage(activeReader, force=true)
+                    NativeLog.add("已执行一次手动屏幕识别")
+                }else{
+                    NativeLog.add("手动识别失败：屏幕捕获尚未就绪")
+                }
+            }
+            return START_NOT_STICKY
+        }
         val resultCode = intent?.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED) ?: Activity.RESULT_CANCELED
         @Suppress("DEPRECATION")
         val data = if (Build.VERSION.SDK_INT >= 33) intent?.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
@@ -106,10 +119,10 @@ class ScreenCaptureService : Service() {
         }
     }
 
-    private fun processLatestImage(source: ImageReader) {
+    private fun processLatestImage(source: ImageReader, force: Boolean = false) {
         val image = try { source.acquireLatestImage() } catch (_: Exception) { null } ?: return
         val now = System.currentTimeMillis()
-        if (now - lastProcessAt < 1000 || !processing.compareAndSet(false, true)) {
+        if ((!force && now - lastProcessAt < 1000) || !processing.compareAndSet(false, true)) {
             image.close()
             return
         }
