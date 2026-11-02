@@ -25,6 +25,7 @@ class OverlayService : Service() {
     private lateinit var wm: WindowManager
     private var panel: LinearLayout? = null
     private var valueText: TextView? = null
+    private var recognitionText: TextView? = null
     private var logText: TextView? = null
     private var logArea: LinearLayout? = null
     private var expanded = false
@@ -67,6 +68,12 @@ class OverlayService : Service() {
         root.addView(header)
         valueText=TextView(this).apply{text="当前估价：等待数据\n建议出价：等待数据";textSize=15f;setTextColor(0xFF1A1E35.toInt());typeface=Typeface.DEFAULT_BOLD;setPadding(0,dp(5),0,dp(7))}
         root.addView(valueText)
+        recognitionText=TextView(this).apply{
+            text="千眼其一：等待识别\n紫品计数：等待识别\n金品均价：等待识别"
+            textSize=12f;setTextColor(0xFF5D6278.toInt());setLineSpacing(dp(2).toFloat(),1f)
+            setPadding(0,0,0,dp(8))
+        }
+        root.addView(recognitionText)
         val actions=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL;gravity=Gravity.CENTER_VERTICAL}
         val recognize=TextView(this).apply{
             text="手动识别屏幕";textSize=12f;gravity=Gravity.CENTER;setTextColor(Color.WHITE)
@@ -106,7 +113,28 @@ class OverlayService : Service() {
     private fun refreshContent(){
         val raw=Store.get("dafu-auction-live")
         if(raw!=null)try{val d=JSONObject(raw);valueText?.text="当前估价："+format(d.optDouble("valuationWan",Double.NaN))+"\n建议出价："+format(d.optDouble("suggestedBidWan",Double.NaN))}catch(_:Exception){}
+        refreshRecognitionValues()
         if(expanded)refreshLogs()
+    }
+    private fun refreshRecognitionValues(){
+        try{
+            val result=JSONObject(ScreenCaptureService.latestJson)
+            val cards=result.optJSONArray("intelCards")
+            val values=mutableMapOf<String,String>()
+            if(cards!=null) for(i in 0 until cards.length()){
+                val card=cards.optJSONObject(i) ?: continue
+                values[card.optString("type")]=card.optString("value")
+            }
+            fun display(type:String,empty:String,unit:String):String{
+                val value=values[type].orEmpty()
+                return if(value.isBlank()) empty else value+unit
+            }
+            recognitionText?.text="千眼其一："+display("auction_info","等待识别","件")+
+                "\n紫品计数："+display("purple_count","等待识别","件")+
+                "\n金品均价："+display("gold_average","等待识别","")
+        }catch(_:Exception){
+            recognitionText?.text="千眼其一：等待识别\n紫品计数：等待识别\n金品均价：等待识别"
+        }
     }
     private fun refreshLogs(){logText?.text=NativeLog.snapshot(8).joinToString("\n").ifBlank{"暂无运行日志"}}
     private fun format(v:Double)=if(v.isNaN()||v.isInfinite())"等待数据" else String.format("%.2f 万",v)
