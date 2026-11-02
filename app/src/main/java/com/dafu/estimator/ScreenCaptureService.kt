@@ -135,7 +135,8 @@ class ScreenCaptureService : Service() {
             val left = (fullBitmap.width * 0.25f).toInt().coerceAtLeast(0)
             val top = (fullBitmap.height * 0.12f).toInt().coerceAtLeast(0)
             val right = (fullBitmap.width * 0.75f).toInt().coerceAtMost(fullBitmap.width)
-            val bottom = (fullBitmap.height * 0.74f).toInt().coerceAtMost(fullBitmap.height)
+            // Include the complete third (gold-average) intelligence card and its value line.
+            val bottom = (fullBitmap.height * 0.90f).toInt().coerceAtMost(fullBitmap.height)
             val bitmap = Bitmap.createBitmap(fullBitmap, left, top, right - left, bottom - top)
             fullBitmap.recycle()
             val input = InputImage.fromBitmap(bitmap, 0)
