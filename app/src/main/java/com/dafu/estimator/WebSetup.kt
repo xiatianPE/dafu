@@ -20,7 +20,7 @@ object WebSetup {
     @SuppressLint("SetJavaScriptEnabled")
     fun attach(web: WebView): Bridge {
         val ctx = web.context
-        val bridge = Bridge(ctx)
+        val bridge = Bridge(ctx, web)
 
         // 用 https://appassets.androidplatform.net 加载本地 assets，origin 固定，localStorage 才稳定
         val loader = WebViewAssetLoader.Builder()
