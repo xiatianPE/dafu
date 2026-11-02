@@ -956,6 +956,54 @@ try{if(localStorage.getItem('dafu-notice')==='1')$('notice').hidden=true}catch(e
 sync();
 function __publishDafuSnapshot(){const num=id=>{const t=$(id)?.textContent?.trim();if(!t||t==='—')return null;const n=Number.parseFloat(t.replace(/,/g,''));return Number.isFinite(n)?n:null;};const d={schemaVersion:1,updatedAt:Date.now(),totalCount:S.total??null,purpleCount:S.purple??null,purpleCounter:S.purple??null,goldRedCount:Number.isFinite(S.total)&&Number.isFinite(S.purple)?S.total-S.purple:null,goldAverageInstrument:S.avg??null,valuationWan:num('est'),valuationFull:num('full'),suggestedBidWan:num('bidv'),suggestedBidTier:$('tn')?.textContent||null,seenBonusWan:num('add'),unknownRedCount:S.unknownR??0};try{if(window.Native&&typeof Native.publishAuctionData==='function')Native.publishAuctionData(JSON.stringify(d));}catch(e){}return d;}
 window.DafuAPI={getSnapshot:()=>__publishDafuSnapshot(),refresh:__publishDafuSnapshot,getNativeSnapshot:()=>{try{return JSON.parse(Native.getAuctionData());}catch(e){return null;}}};
+
+// 原生屏幕 OCR -> 网页估价器：把三张情报卡的实时读数写入正式输入状态。
+(function(){
+ let lastCapture=0;
+ let lastSignature="";
+ function syncScreenRecognition(){
+  try{
+   if(!window.Native||typeof Native.get!=="function")return;
+   const raw=Native.get("dafu-screen-recognition");
+   if(!raw)return;
+   const data=JSON.parse(raw);
+   const captured=Number(data.capturedAt||0);
+   if(!captured||captured<=lastCapture)return;
+   const cards=data.intelCards;
+   if(!cards||typeof cards.length!=="number")return;
+   const byType={};
+   for(let i=0;i<cards.length;i++){
+    const card=cards[i];
+    if(card&&card.valueDetected&&card.value!==undefined&&String(card.value).trim()!=="")
+     byType[card.type]=Number(String(card.value).replace(/,/g,""));
+   }
+   const total=byType.auction_info;
+   const purple=byType.purple_count;
+   const average=byType.gold_average;
+   // 必须三项都成功才更新，避免半张截图把本局已有数据覆盖成错误组合。
+   if(!Number.isInteger(total)||!Number.isInteger(purple)||!Number.isFinite(average)||
+      total<0||purple<0||purple>total||average<0)return;
+   const signature=[total,purple,average].join("|");
+   lastCapture=captured;
+   if(signature===lastSignature)return;
+   lastSignature=signature;
+   S.total=total;
+   S.purple=purple;
+   S.avg=average;
+   save();
+   sync();
+   autoCalc(true);
+   const status=$("cm");
+   if(status)status.textContent="屏幕识别已同步：总数 "+total+" 件 · 紫品 "+purple+" 件 · 金均 "+average.toLocaleString("en-US");
+   try{Native.set("dafu-screen-recognition-web-sync",JSON.stringify({capturedAt:captured,total:total,purple:purple,average:average,applied:true}));}catch(e){}
+  }catch(e){}
+ }
+ setInterval(syncScreenRecognition,700);
+ window.addEventListener("dafu-native",function(e){
+  if(e.detail&&e.detail.name==="screen-recognition")syncScreenRecognition();
+ });
+ syncScreenRecognition();
+})();
 [['total','purple'],['purple','avg'],['avg',null]].forEach(p=>{const el=$(p[0]);el.setAttribute('enterkeyhint',p[1]?'next':'done');
  el.addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();if(p[1])$(p[1]).focus();else{el.blur();autoCalc(true)}})});
 const openLog=()=>{$('logModal').hidden=false;document.body.style.overflow='hidden'},closeLog=()=>{$('logModal').hidden=true;document.body.style.overflow=''};
