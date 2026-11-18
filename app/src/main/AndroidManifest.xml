@@ -38,7 +38,14 @@
             <meta-data android:name="android.accessibilityservice" android:resource="@xml/screen_assist_config" />
         </service>
 
-        <service android:name=".RegionSelectionService" android:exported="false" />
+        <service
+            android:name=".RegionSelectionService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="user_selected_screen_region_overlay" />
+        </service>
 
         <service
             android:name=".ScreenCaptureService"
