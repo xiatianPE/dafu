@@ -16,6 +16,10 @@ android {
         versionName = "1.0"
     }
 
+    buildFeatures {
+        aidl = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
