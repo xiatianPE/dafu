@@ -79,46 +79,53 @@ object ScreenRecognition {
             }
         }
 
-        // Assign every non-title line to the nearest detected card title.
-        // This supports horizontal, vertical and mixed card layouts without
-        // relying on a fixed x/y band or assuming the next card is below.
-        val assigned = anchors.associateWith { mutableListOf<NearbyLine>() }
-        for (line in ordered) {
-            if (line in usedAnchorLines || anchors.isEmpty()) continue
-            val nearest = anchors
-                .map { anchor -> anchor to spatialDistance(line, anchor.line, safeWidth, safeHeight) }
-                .minByOrNull { it.second }
-                ?: continue
-
-            // A line outside this adaptive neighborhood is probably unrelated
-            // game HUD text, a button, or text from another part of the screen.
-            if (nearest.second <= 1.55) {
-                assigned[nearest.first]?.add(NearbyLine(line, nearest.second))
-            }
-        }
-
+        // Read values from the description belonging to each card, not from
+        // arbitrary nearby HUD text. The three cards have distinctive Chinese
+        // description phrases; those phrases are stronger evidence than distance.
         val cards = JSONArray()
         val missingValues = JSONArray()
 
         for (anchor in anchors) {
             val target = anchor.target
-            val nearby = assigned[anchor].orEmpty()
-                .sortedWith(compareBy<NearbyLine> { it.line.box.centerY() }.thenBy { it.line.box.centerX() })
-            val cardLines = listOf(NearbyLine(anchor.line, 0.0)) + nearby
-            val description = cardLines
-                .sortedWith(compareBy<NearbyLine> { it.line.box.centerY() }.thenBy { it.line.box.centerX() })
-                .joinToString(" ") { it.line.text }
-
-            // Also inspect the title line itself in case OCR placed the title
-            // and its numeric value on the same visual line.
-            val numericCandidates = cardLines.mapNotNull { item ->
-                val match = numberPattern.find(item.line.text) ?: return@mapNotNull null
-                val value = match.groupValues[1].replace(",", "")
-                val hintBonus = semanticHintBonus(target, item.line.text)
-                Triple(item, value, item.distance - hintBonus)
+            val localLines = ordered.filter { line ->
+                if (line == anchor.line) return@filter false
+                val dx = abs(line.box.centerX() - anchor.line.box.centerX()).toDouble()
+                val dy = line.box.centerY() - anchor.line.box.centerY().toDouble()
+                // Description is below the title in the card. Tight bounds prevent
+                // values from the inventory, top HUD and neighboring cards leaking in.
+                dx <= (safeWidth * 0.18) && dy in 0.0..(safeHeight * 0.14)
             }
-            val bestNumber = numericCandidates.minByOrNull { it.third }?.second
+
+            fun isTargetDescription(value: String): Boolean {
+                val n = normalize(value)
+                return when (target.type) {
+                    "auction_info" ->
+                        n.contains("总件数") || n.contains("总数量") ||
+                        (n.contains("本局内") && n.contains("藏品") && n.contains("件"))
+                    "purple_count" ->
+                        (n.contains("紫色品质") || n.contains("紫品")) &&
+                        (n.contains("总数量") || n.contains("总件数") || n.contains("数量"))
+                    "gold_average" ->
+                        (n.contains("金色品质") || n.contains("金品")) &&
+                        (n.contains("平均价值") || n.contains("平均价") || n.contains("均价"))
+                    else -> false
+                }
+            }
+
+            val matchingDescription = localLines
+                .filter { isTargetDescription(it.text) }
+                .sortedBy { abs(it.box.centerY() - anchor.line.box.centerY()) }
+            val bestLine = matchingDescription.firstOrNull()
+            val bestNumber = bestLine?.let { line ->
+                numberPattern.findAll(line.text)
+                    .map { it.groupValues[1].replace(",", "") }
+                    .firstOrNull()
+            }
             if (bestNumber == null) missingValues.put(target.title)
+
+            val description = (listOf(anchor.line) + localLines)
+                .sortedWith(compareBy<OcrLine> { it.box.centerY() }.thenBy { it.box.centerX() })
+                .joinToString(" ") { it.text }
 
             cards.put(
                 JSONObject()
@@ -127,6 +134,7 @@ object ScreenRecognition {
                     .put("detected", true)
                     .put("anchorText", anchor.line.text)
                     .put("description", description)
+                    .put("matchedDescription", bestLine?.text ?: "")
                     .put("value", bestNumber ?: "")
                     .put("unit", target.unit)
                     .put("valueDetected", bestNumber != null)
