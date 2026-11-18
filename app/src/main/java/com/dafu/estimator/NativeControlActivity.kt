@@ -116,6 +116,23 @@ class NativeControlActivity : Activity() {
             refreshRegion()
         }
         captureCard.addView(buttonRow(select, clear), LinearLayout.LayoutParams(-1,-2).apply { topMargin = dp(9) })
+        val overlayStart = button("开启悬浮窗", 1) {
+            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(this)) {
+                Toast.makeText(this, "请先授予悬浮窗权限", Toast.LENGTH_LONG).show()
+                try { startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))) } catch (_: Exception) {}
+            } else {
+                try {
+                    val intent = Intent(this, OverlayService::class.java)
+                    if (Build.VERSION.SDK_INT >= 26) startForegroundService(intent) else startService(intent)
+                    NativeLog.add("用户从原生控制页启动悬浮窗")
+                } catch (e: Exception) { NativeLog.add("启动悬浮窗失败：" + (e.message ?: e.javaClass.simpleName)) }
+            }
+        }
+        val overlayStop = button("关闭悬浮窗", 0) {
+            stopService(Intent(this, OverlayService::class.java))
+            NativeLog.add("用户从原生控制页关闭悬浮窗")
+        }
+        captureCard.addView(buttonRow(overlayStart, overlayStop), LinearLayout.LayoutParams(-1,-2).apply { topMargin = dp(9) })
         body.addView(captureCard, margins(0,dp(9),0,dp(20)))
 
         // 2. Compact three-card results
