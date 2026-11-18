@@ -16,9 +16,6 @@ import android.os.HandlerThread
 import android.os.IBinder
 import android.util.DisplayMetrics
 import android.view.WindowManager
-import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognition
-import com.google.mlkit.vision.text.chinese.ChineseTextRecognizerOptions
 import org.json.JSONObject
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
@@ -38,7 +35,7 @@ class ScreenCaptureService : Service() {
     private var reader: ImageReader? = null
     private var worker: HandlerThread? = null
     private var handler: Handler? = null
-    private val recognizer by lazy { TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build()) }
+    private var ocrEngine: OcrEngine? = null
     private val processing = AtomicBoolean(false)
     private var lastProcessAt = 0L
     private var lastRecognitionSummary = ""
@@ -62,31 +59,45 @@ class ScreenCaptureService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == "STOP") { stopSelf(); return START_NOT_STICKY }
+        if (intent?.action == "STOP") {
+            stopSelf()
+            return START_NOT_STICKY
+        }
         if (intent?.action == ACTION_RECOGNIZE_NOW) {
             handler?.post {
-                val activeReader=reader
-                if(activeReader!=null && running){
-                    processLatestImage(activeReader, force=true)
+                val activeReader = reader
+                if (activeReader != null && running) {
+                    processLatestImage(activeReader, force = true)
                     NativeLog.add("已执行一次手动屏幕识别")
-                }else{
+                } else {
                     NativeLog.add("手动识别失败：屏幕捕获尚未就绪")
                 }
             }
             return START_NOT_STICKY
         }
-        val resultCode = intent?.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED) ?: Activity.RESULT_CANCELED
+
+        val resultCode = intent?.getIntExtra(EXTRA_RESULT_CODE, Activity.RESULT_CANCELED)
+            ?: Activity.RESULT_CANCELED
         @Suppress("DEPRECATION")
-        val data = if (Build.VERSION.SDK_INT >= 33) intent?.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
-                   else intent?.getParcelableExtra(EXTRA_RESULT_DATA)
-        if (resultCode != Activity.RESULT_OK || data == null) {
-            NativeLog.add("OCR 启动失败：缺少屏幕授权数据"); stopSelf(); return START_NOT_STICKY
+        val data = if (Build.VERSION.SDK_INT >= 33) {
+            intent?.getParcelableExtra(EXTRA_RESULT_DATA, Intent::class.java)
+        } else {
+            intent?.getParcelableExtra(EXTRA_RESULT_DATA)
         }
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            NativeLog.add("OCR 启动失败：缺少屏幕授权数据")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         try {
             val manager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
             projection = manager.getMediaProjection(resultCode, data)
             projection?.registerCallback(object : MediaProjection.Callback() {
-                override fun onStop() { NativeLog.add("系统已停止屏幕捕获"); stopSelf() }
+                override fun onStop() {
+                    NativeLog.add("系统已停止屏幕捕获")
+                    stopSelf()
+                }
             }, handler)
             reader = ImageReader.newInstance(screenWidth, screenHeight, PixelFormat.RGBA_8888, 2)
             reader?.setOnImageAvailableListener({ source -> processLatestImage(source) }, handler)
@@ -95,8 +106,13 @@ class ScreenCaptureService : Service() {
                 DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR, reader?.surface, null, handler
             )
             running = true
-            latestJson = JSONObject().put("status", "running").put("screenWidth", screenWidth).put("screenHeight", screenHeight).toString()
-            NativeLog.add("OCR 屏幕捕获运行中：${screenWidth}×${screenHeight}")
+            latestJson = JSONObject()
+                .put("status", "running")
+                .put("screenWidth", screenWidth)
+                .put("screenHeight", screenHeight)
+                .put("engine", "PP-OCRv4-mobile/ONNX-Runtime")
+                .toString()
+            NativeLog.add("屏幕捕获已启动，OCR 引擎将在首帧初始化")
         } catch (e: Exception) {
             NativeLog.add("OCR 初始化失败：" + (e.message ?: e.javaClass.simpleName))
             stopSelf()
@@ -106,17 +122,22 @@ class ScreenCaptureService : Service() {
 
     private fun createNotification() {
         val nm = getSystemService(NotificationManager::class.java)
-        nm.createNotificationChannel(NotificationChannel(CHANNEL, "达芙屏幕识别", NotificationManager.IMPORTANCE_LOW))
-        val n = Notification.Builder(this, CHANNEL).setSmallIcon(R.drawable.ic_stat)
-            .setContentTitle("达芙屏幕识别").setContentText("正在识别当前拍卖画面")
-            .setOngoing(true).build()
-        // A service launched with startForegroundService() must enter foreground promptly.
-        // Creating the notification channel alone is not enough; without this call Android
-        // may stop the capture service before the first OCR frame is processed.
+        nm.createNotificationChannel(
+            NotificationChannel(CHANNEL, "达芙屏幕识别", NotificationManager.IMPORTANCE_LOW)
+        )
+        val notification = Notification.Builder(this, CHANNEL)
+            .setSmallIcon(R.drawable.ic_stat)
+            .setContentTitle("达芙屏幕识别")
+            .setContentText("正在本机离线识别拍卖画面")
+            .setOngoing(true)
+            .build()
         if (Build.VERSION.SDK_INT >= 34) {
-            startForeground(22, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION)
+            startForeground(
+                22, notification,
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            )
         } else {
-            startForeground(22, n)
+            startForeground(22, notification)
         }
     }
 
@@ -128,79 +149,74 @@ class ScreenCaptureService : Service() {
             return
         }
         lastProcessAt = now
+
+        var activeImage: Image? = image
+        var fullBitmap: Bitmap? = null
+        var prepared: PreparedOcrFrame? = null
         try {
-            val fullBitmap = imageToBitmap(image)
+            fullBitmap = imageToBitmap(image)
             image.close()
-            // Use a user-selected normalized region when available; otherwise keep full-screen mode.
-            val regionJson = Store.get("dafu-ocr-region")
-            var regionUsed = false
-            val bitmap = try {
-                if (!regionJson.isNullOrBlank()) {
-                    val region = JSONObject(regionJson)
-                    val left = (region.optDouble("left", 0.0) * fullBitmap.width).toInt().coerceIn(0, fullBitmap.width - 1)
-                    val top = (region.optDouble("top", 0.0) * fullBitmap.height).toInt().coerceIn(0, fullBitmap.height - 1)
-                    val right = (region.optDouble("right", 1.0) * fullBitmap.width).toInt().coerceIn(left + 1, fullBitmap.width)
-                    val bottom = (region.optDouble("bottom", 1.0) * fullBitmap.height).toInt().coerceIn(top + 1, fullBitmap.height)
-                    regionUsed = true
-                    Bitmap.createBitmap(fullBitmap, left, top, right - left, bottom - top).also {
-                        if (it !== fullBitmap) fullBitmap.recycle()
-                    }
-                } else fullBitmap
-            } catch (_: Exception) { fullBitmap }
-            val input = InputImage.fromBitmap(bitmap, 0)
-            recognizer.process(input)
-                .addOnSuccessListener { text ->
-                    val parsed = ScreenRecognition.parse(text, bitmap.width, bitmap.height)
-                    parsed.put("regionUsed", regionUsed)
-                    latestJson = parsed.toString()
-                    val cards = parsed.optJSONArray("intelCards")
-                    val summary = (0 until (cards?.length() ?: 0)).joinToString(" · ") { index ->
-                        val card = cards?.optJSONObject(index) ?: JSONObject()
-                        val value = if (card.optBoolean("valueDetected")) card.optString("value") else "未读到数字"
-                        "${card.optString("title")}=$value"
-                    }
-                    val logSummary = "${parsed.optString("status")} | $summary"
-                    if (logSummary != lastRecognitionSummary) {
-                        NativeLog.add("全屏 OCR：${parsed.optInt("detectedCount")}/3 张卡片 | $logSummary")
-                        lastRecognitionSummary = logSummary
-                    }
-                    Store.set("dafu-screen-recognition", latestJson)
-                }
-                .addOnFailureListener { e ->
-                    latestJson = JSONObject()
-                        .put("source", "full_screen_ocr")
-                        .put("status", "ocr_error")
-                        .put("message", e.message ?: "识别失败")
-                        .put("capturedAt", System.currentTimeMillis())
-                        .toString()
-                    Store.set("dafu-screen-recognition", latestJson)
-                    NativeLog.add("OCR 识别失败：" + (e.message ?: e.javaClass.simpleName))
-                }
-                .addOnCompleteListener { bitmap.recycle(); processing.set(false) }
+            activeImage = null
+
+            prepared = OcrImagePreprocessor.prepare(
+                fullBitmap,
+                Store.get("dafu-ocr-region")
+            )
+            val bitmap = prepared.bitmap
+            val engine = ocrEngine ?: RapidOcrEngine(this).also { ocrEngine = it }
+            val frame = engine.recognize(bitmap)
+            val parsed = AuctionCardRecognizer.parse(
+                frame, bitmap.width, bitmap.height, prepared.regionUsed
+            )
+            latestJson = parsed.toString()
+
+            val cards = parsed.optJSONArray("intelCards")
+            val summary = (0 until (cards?.length() ?: 0)).joinToString(" · ") { index ->
+                val card = cards?.optJSONObject(index) ?: JSONObject()
+                val value = if (card.optBoolean("valueDetected")) card.optString("value") else "未读到数字"
+                "\${card.optString("title")}=$value"
+            }
+            val logSummary = "\${parsed.optString("status")} | $summary"
+            if (logSummary != lastRecognitionSummary) {
+                NativeLog.add(
+                    "PP-OCR：\${parsed.optInt("detectedCount")}/3 张卡片 | " +
+                        "\${frame.elapsedSeconds}s | $logSummary"
+                )
+                lastRecognitionSummary = logSummary
+            }
+            Store.set("dafu-screen-recognition", latestJson)
         } catch (e: Exception) {
-            try { image.close() } catch (_: Exception) {}
             latestJson = JSONObject()
-                .put("source", "full_screen_ocr")
-                .put("status", "frame_error")
+                .put("source", "rapidocr_ppocrv4")
+                .put("engine", "PP-OCRv4-mobile/ONNX-Runtime")
+                .put("status", "ocr_error")
                 .put("message", e.message ?: e.javaClass.simpleName)
                 .put("capturedAt", System.currentTimeMillis())
                 .toString()
             Store.set("dafu-screen-recognition", latestJson)
+            NativeLog.add("PP-OCR 识别失败：" + (e.message ?: e.javaClass.simpleName))
+        } finally {
+            try { activeImage?.close() } catch (_: Exception) {}
+            try {
+                if (prepared?.ownsBitmap == true) prepared?.bitmap?.recycle()
+            } catch (_: Exception) {}
+            try { fullBitmap?.recycle() } catch (_: Exception) {}
             processing.set(false)
-            NativeLog.add("处理屏幕帧失败：" + (e.message ?: e.javaClass.simpleName))
         }
     }
 
     private fun imageToBitmap(image: Image): Bitmap {
+        val width = image.width
+        val height = image.height
         val plane = image.planes[0]
         val buffer: ByteBuffer = plane.buffer
         val pixelStride = plane.pixelStride
         val rowStride = plane.rowStride
-        val rowPadding = rowStride - pixelStride * screenWidth
-        val paddedWidth = screenWidth + rowPadding / pixelStride
-        val padded = Bitmap.createBitmap(paddedWidth, screenHeight, Bitmap.Config.ARGB_8888)
+        val rowPadding = rowStride - pixelStride * width
+        val paddedWidth = width + rowPadding / pixelStride
+        val padded = Bitmap.createBitmap(paddedWidth, height, Bitmap.Config.ARGB_8888)
         padded.copyPixelsFromBuffer(buffer)
-        val cropped = Bitmap.createBitmap(padded, 0, 0, screenWidth, screenHeight)
+        val cropped = Bitmap.createBitmap(padded, 0, 0, width, height)
         padded.recycle()
         return cropped
     }
@@ -210,9 +226,10 @@ class ScreenCaptureService : Service() {
         try { display?.release() } catch (_: Exception) {}
         try { reader?.close() } catch (_: Exception) {}
         try { projection?.stop() } catch (_: Exception) {}
-        try { recognizer.close() } catch (_: Exception) {}
+        try { ocrEngine?.close() } catch (_: Exception) {}
+        ocrEngine = null
         worker?.quitSafely()
-        NativeLog.add("屏幕 OCR 已停止")
+        NativeLog.add("屏幕识别已停止")
         super.onDestroy()
     }
 }
