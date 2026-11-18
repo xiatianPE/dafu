@@ -957,7 +957,7 @@ sync();
 function __publishDafuSnapshot(){const num=id=>{const t=$(id)?.textContent?.trim();if(!t||t==='—')return null;const n=Number.parseFloat(t.replace(/,/g,''));return Number.isFinite(n)?n:null;};const d={schemaVersion:1,updatedAt:Date.now(),totalCount:S.total??null,purpleCount:S.purple??null,purpleCounter:S.purple??null,goldRedCount:Number.isFinite(S.total)&&Number.isFinite(S.purple)?S.total-S.purple:null,goldAverageInstrument:S.avg??null,valuationWan:num('est'),valuationFull:num('full'),suggestedBidWan:num('bidv'),suggestedBidTier:$('tn')?.textContent||null,seenBonusWan:num('add'),unknownRedCount:S.unknownR??0};try{if(window.Native&&typeof Native.publishAuctionData==='function')Native.publishAuctionData(JSON.stringify(d));}catch(e){}return d;}
 window.DafuAPI={getSnapshot:()=>__publishDafuSnapshot(),refresh:__publishDafuSnapshot,getNativeSnapshot:()=>{try{return JSON.parse(Native.getAuctionData());}catch(e){return null;}}};
 
-// 原生屏幕 OCR -> 网页估价器：把三张情报卡的实时读数写入正式输入状态。
+// 原生屏幕 OCR -> 网页估价器：允许情报卡按回合动态出现，逐字段同步有效读数。
 (function(){
  let lastCapture=0;
  let lastSignature="";
@@ -974,28 +974,47 @@ window.DafuAPI={getSnapshot:()=>__publishDafuSnapshot(),refresh:__publishDafuSna
    const byType={};
    for(let i=0;i<cards.length;i++){
     const card=cards[i];
-    if(card&&card.valueDetected&&card.value!==undefined&&String(card.value).trim()!=="")
-     byType[card.type]=Number(String(card.value).replace(/,/g,""));
+    if(!card||!card.valueDetected||card.value===undefined||String(card.value).trim()==="")continue;
+    const value=Number(String(card.value).replace(/,/g,""));
+    if(Number.isFinite(value)&&value>=0)byType[card.type]=value;
    }
-   const total=byType.auction_info;
-   const purple=byType.purple_count;
-   const average=byType.gold_average;
-   // 必须三项都成功才更新，避免半张截图把本局已有数据覆盖成错误组合。
-   if(!Number.isInteger(total)||!Number.isInteger(purple)||!Number.isFinite(average)||
-      total<0||purple<0||purple>total||average<0)return;
-   const signature=[total,purple,average].join("|");
+   const hasTotal=Number.isInteger(byType.auction_info);
+   const hasPurple=Number.isInteger(byType.purple_count);
+   const hasAverage=Number.isFinite(byType.gold_average);
+   // 卡片会随回合变化：只更新本帧确实识别到的字段，缺失卡片不阻断其他字段。
+   // 若本帧同时读到总数和紫品数，才校验紫品数不能大于总数。
+   if(hasTotal&&hasPurple&&byType.purple_count>byType.auction_info)return;
+   if(!hasTotal&&!hasPurple&&!hasAverage)return;
+   const signature=[hasTotal?byType.auction_info:"-",hasPurple?byType.purple_count:"-",hasAverage?byType.gold_average:"-"].join("|");
    lastCapture=captured;
    if(signature===lastSignature)return;
    lastSignature=signature;
-   S.total=total;
-   S.purple=purple;
-   S.avg=average;
+   if(hasTotal)S.total=byType.auction_info;
+   if(hasPurple)S.purple=byType.purple_count;
+   if(hasAverage)S.avg=byType.gold_average;
    save();
    sync();
    autoCalc(true);
    const status=$("cm");
-   if(status)status.textContent="屏幕识别已同步：总数 "+total+" 件 · 紫品 "+purple+" 件 · 金均 "+average.toLocaleString("en-US");
-   try{Native.set("dafu-screen-recognition-web-sync",JSON.stringify({capturedAt:captured,total:total,purple:purple,average:average,applied:true}));}catch(e){}
+   if(status){
+    const parts=[];
+    if(hasTotal)parts.push("总数 "+byType.auction_info+" 件");
+    if(hasPurple)parts.push("紫品 "+byType.purple_count+" 件");
+    if(hasAverage)parts.push("金均 "+byType.gold_average.toLocaleString("en-US"));
+    const missing=[];
+    if(!hasTotal)missing.push("总数卡本帧未出现/未识别，沿用当前值");
+    if(!hasPurple)missing.push("紫品卡本帧未出现/未识别，沿用当前值");
+    if(!hasAverage)missing.push("金均卡本帧未出现/未识别，沿用当前值");
+    status.textContent="屏幕识别已同步："+parts.join(" · ")+(missing.length?"；"+missing.join("；"):"");
+   }
+   try{Native.set("dafu-screen-recognition-web-sync",JSON.stringify({
+    capturedAt:captured,
+    total:hasTotal?byType.auction_info:null,
+    purple:hasPurple?byType.purple_count:null,
+    average:hasAverage?byType.gold_average:null,
+    applied:true,
+    partial:!(hasTotal&&hasPurple&&hasAverage)
+   }));}catch(e){}
   }catch(e){}
  }
  setInterval(syncScreenRecognition,700);
