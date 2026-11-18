@@ -75,24 +75,32 @@ class OverlayService : Service() {
         }
         root.addView(recognitionText)
         val actions=LinearLayout(this).apply{orientation=LinearLayout.HORIZONTAL;gravity=Gravity.CENTER_VERTICAL}
-        val recognize=TextView(this).apply{
-            text="手动识别屏幕";textSize=12f;gravity=Gravity.CENTER;setTextColor(Color.WHITE)
-            background=GradientDrawable().apply{setColor(0xFFD99A14.toInt());cornerRadius=dp(9).toFloat()}
-            setPadding(dp(10),dp(8),dp(10),dp(8))
-            setOnClickListener{
-                if(ScreenCaptureService.running){
-                    val request=Intent(this@OverlayService,ScreenCaptureService::class.java).setAction(ScreenCaptureService.ACTION_RECOGNIZE_NOW)
-                    try{
-                        if(Build.VERSION.SDK_INT>=26)startForegroundService(request) else startService(request)
-                        NativeLog.add("悬浮窗请求立即识别屏幕")
-                    }catch(e:Exception){NativeLog.add("手动识别请求失败："+(e.message?:e.javaClass.simpleName))}
-                }else{
-                    NativeLog.add("手动识别：屏幕 OCR 尚未启动，打开授权")
-                    try{ScreenCaptureActivity.launch(this@OverlayService)}catch(e:Exception){NativeLog.add("无法打开屏幕授权："+(e.message?:e.javaClass.simpleName))}
-                }
+        fun overlayAction(text:String,primary:Boolean,onClick:()->Unit)=TextView(this).apply{
+            this.text=text;textSize=11.5f;gravity=Gravity.CENTER;setTextColor(if(primary)Color.WHITE else 0xFF343954.toInt())
+            background=GradientDrawable().apply{setColor(if(primary)0xFFD99A14.toInt() else 0xFFE9EBF4.toInt());cornerRadius=dp(9).toFloat()}
+            setPadding(dp(7),dp(9),dp(7),dp(9));setOnClickListener{onClick()}
+        }
+        val recognize=overlayAction("手动识别",true){
+            if(ScreenCaptureService.running){
+                val request=Intent(this@OverlayService,ScreenCaptureService::class.java).setAction(ScreenCaptureService.ACTION_RECOGNIZE_NOW)
+                try{
+                    if(Build.VERSION.SDK_INT>=26)startForegroundService(request) else startService(request)
+                    NativeLog.add("悬浮窗请求立即识别屏幕")
+                }catch(e:Exception){NativeLog.add("手动识别请求失败："+(e.message?:e.javaClass.simpleName))}
+            }else{
+                NativeLog.add("手动识别：屏幕 OCR 尚未启动，打开授权")
+                try{ScreenCaptureActivity.launch(this@OverlayService)}catch(e:Exception){NativeLog.add("无法打开屏幕授权："+(e.message?:e.javaClass.simpleName))}
             }
         }
-        actions.addView(recognize,LinearLayout.LayoutParams(-1,dp(36)))
+        val region=overlayAction("框选区域",false){
+            try{
+                val request=Intent(this@OverlayService,RegionSelectionService::class.java)
+                if(Build.VERSION.SDK_INT>=26)startForegroundService(request) else startService(request)
+                NativeLog.add("从悬浮窗打开 OCR 区域框选")
+            }catch(e:Exception){NativeLog.add("打开区域框选失败："+(e.message?:e.javaClass.simpleName))}
+        }
+        actions.addView(recognize,LinearLayout.LayoutParams(0,dp(38),1f))
+        actions.addView(region,LinearLayout.LayoutParams(0,dp(38),1f).apply{leftMargin=dp(7)})
         root.addView(actions,LinearLayout.LayoutParams(-1,-2).apply{bottomMargin=dp(5)})
         val logToggle=TextView(this).apply{text="运行日志  ▾";textSize=12f;setTextColor(0xFF8A6A2E.toInt());gravity=Gravity.END;setPadding(0,dp(4),0,dp(2));setOnClickListener{toggleLogs()}}
         root.addView(logToggle)
