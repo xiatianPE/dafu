@@ -184,3 +184,18 @@ app/src/main/
 如果这个项目对你有帮助，欢迎 ⭐ Star 支持。
 
 </div>
+
+
+## 新版离线 OCR（PP-OCR）
+
+屏幕识别已从 ML Kit 切换为独立的 RapidOCR4j Android / ONNX Runtime 管线：
+
+- PP-OCRv4 中文 Mobile 检测与识别模型由 OCR Android 依赖提供，安装后可离线推理。
+- 截图采集、手动区域裁剪、OCR 引擎、拍卖卡片解析相互独立。
+- 只解析「千眼其一」「紫品计数仪器」「金品均价仪器」三张情报卡。
+- 诊断数据包含逐行文本框坐标、识别置信度和检测/识别耗时。
+- WebView Bridge 的 `dafu-screen-recognition` 数据键保持不变。
+
+**系统要求：Android 10（API 29）及以上。** 这是当前采用的 RapidOCR4j Android 1.0.0 AAR 的最低系统要求。模型和推理库会增加 APK 体积，但识别过程不依赖联网。
+
+底层 Android OCR 依赖：[RapidOCR4j-Android](https://github.com/hzkitty/RapidOCR4j-Android)（Apache-2.0）；OCR 模型来源及版本说明见 [RapidOCR 模型文档](https://rapidai.github.io/RapidOCRDocs/main/model_list/)。
