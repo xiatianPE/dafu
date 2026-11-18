@@ -62,7 +62,7 @@ object ScreenRecognition {
 
         for (target in targets) {
             val targetText = normalize(target.title)
-            val candidate = ordered
+            val titleCandidate = ordered
                 .asSequence()
                 .filter { it !in usedAnchorLines }
                 .map { line -> line to similarity(normalize(line.text), targetText) }
@@ -71,11 +71,18 @@ object ScreenRecognition {
                 }
                 .maxByOrNull { it.second }
 
+            // If ML Kit misses a short/bold title, use the card's distinctive
+            // description sentence as a fallback anchor so round-to-round card
+            // reordering or OCR title omissions do not make the card disappear.
+            val candidate = titleCandidate?.first ?: ordered.firstOrNull { line ->
+                line !in usedAnchorLines && isTargetDescription(target, line.text)
+            }
+
             if (candidate == null) {
                 missing.put(target.title)
             } else {
-                usedAnchorLines += candidate.first
-                anchors += Anchor(target, candidate.first)
+                usedAnchorLines += candidate
+                anchors += Anchor(target, candidate)
             }
         }
 
@@ -96,24 +103,8 @@ object ScreenRecognition {
                 dx <= (safeWidth * 0.18) && dy in 0.0..(safeHeight * 0.14)
             }
 
-            fun isTargetDescription(value: String): Boolean {
-                val n = normalize(value)
-                return when (target.type) {
-                    "auction_info" ->
-                        n.contains("总件数") || n.contains("总数量") ||
-                        (n.contains("本局内") && n.contains("藏品") && n.contains("件"))
-                    "purple_count" ->
-                        (n.contains("紫色品质") || n.contains("紫品")) &&
-                        (n.contains("总数量") || n.contains("总件数") || n.contains("数量"))
-                    "gold_average" ->
-                        (n.contains("金色品质") || n.contains("金品")) &&
-                        (n.contains("平均价值") || n.contains("平均价") || n.contains("均价"))
-                    else -> false
-                }
-            }
-
-            val matchingDescription = localLines
-                .filter { isTargetDescription(it.text) }
+            val matchingDescription = (listOf(anchor.line) + localLines)
+                .filter { isTargetDescription(target, it.text) }
                 .sortedBy { abs(it.box.centerY() - anchor.line.box.centerY()) }
             val bestLine = matchingDescription.firstOrNull()
             val bestNumber = bestLine?.let { line ->
@@ -182,6 +173,22 @@ object ScreenRecognition {
      * Normalized geometric distance. The wider horizontal radius allows cards
      * laid out side-by-side; the vertical radius supports stacked card layouts.
      */
+    private fun isTargetDescription(target: Target, value: String): Boolean {
+        val n = normalize(value)
+        return when (target.type) {
+            "auction_info" ->
+                n.contains("总件数") || n.contains("总数量") ||
+                (n.contains("本局内") && n.contains("藏品") && n.contains("件"))
+            "purple_count" ->
+                (n.contains("紫色品质") || n.contains("紫品")) &&
+                (n.contains("总数量") || n.contains("总件数") || n.contains("数量"))
+            "gold_average" ->
+                (n.contains("金色品质") || n.contains("金品")) &&
+                (n.contains("平均价值") || n.contains("平均价") || n.contains("均价"))
+            else -> false
+        }
+    }
+
     private fun spatialDistance(line: OcrLine, anchor: OcrLine, width: Int, height: Int): Double {
         val dx = abs(line.box.centerX() - anchor.box.centerX()).toDouble() / (width * 0.30).coerceAtLeast(1.0)
         val dy = abs(line.box.centerY() - anchor.box.centerY()).toDouble() / (height * 0.22).coerceAtLeast(1.0)
