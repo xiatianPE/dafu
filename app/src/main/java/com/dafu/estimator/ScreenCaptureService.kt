@@ -184,6 +184,37 @@ class ScreenCaptureService : Service() {
                 )
                 lastRecognitionSummary = logSummary
             }
+
+            // Keep every recognized text region in the persistent runtime log.
+            // Do not filter by card title here: this is the raw full-screen OCR output.
+            val rawOcrLog = buildString {
+                append("全屏 OCR 原始文字（")
+                append(frame.regions.size)
+                append(" 行）")
+                if (frame.regions.isEmpty()) {
+                    append("\\n<未识别到任何文字>")
+                } else {
+                    frame.regions.forEachIndexed { index, line ->
+                        val b = line.bounds
+                        append("\\n")
+                        append(index + 1)
+                        append(". ")
+                        append(line.text)
+                        append("  [x:")
+                        append(b.left)
+                        append("-")
+                        append(b.right)
+                        append(" y:")
+                        append(b.top)
+                        append("-")
+                        append(b.bottom)
+                        append(" conf:")
+                        append(String.format(java.util.Locale.US, "%.3f", line.confidence))
+                        append("]")
+                    }
+                }
+            }
+            NativeLog.addRawOcr(rawOcrLog)
             Store.set("dafu-screen-recognition", latestJson)
         } catch (e: Exception) {
             latestJson = JSONObject()
