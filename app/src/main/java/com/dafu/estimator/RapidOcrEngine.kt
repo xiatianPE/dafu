@@ -20,10 +20,10 @@ class RapidOcrEngine(context: Context) : OcrEngine {
 
     init {
         val config = OcrConfig()
-        config.global.isPrintVerbose = false
-        config.global.isUseDet = true
-        config.global.isUseCls = false // game UI is upright; skip unnecessary classifier
-        config.global.isUseRec = true
+        config.global.printVerbose = false
+        config.global.useDet = true
+        config.global.useCls = false // game UI is upright; skip unnecessary classifier
+        config.global.useRec = true
         config.global.textScore = 0.30f
         config.global.minHeight = 18
         config.global.widthHeightRatio = -1.0f
