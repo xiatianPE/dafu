@@ -158,10 +158,21 @@ class ScreenCaptureService : Service() {
             image.close()
             activeImage = null
 
-            // Always OCR the complete captured screen first. Card matching happens
-            // only after the engine has returned every text region and its coordinates.
-            // Saved manual regions must not hide text during the initial full-screen pass.
-            prepared = OcrImagePreprocessor.prepare(fullBitmap, null)
+            // Apply the user's saved normalized region to the actual captured frame.
+            // A saved selection must affect the pixels sent to OCR, not just the UI label.
+            val savedRegion = Store.get("dafu-ocr-region")
+            prepared = OcrImagePreprocessor.prepare(fullBitmap, savedRegion)
+            NativeLog.add(
+                if (prepared.regionUsed) {
+                    "OCR 输入已裁剪为手动区域：${prepared.bitmap.width}×${prepared.bitmap.height}（原图 ${fullBitmap.width}×${fullBitmap.height}）"
+                } else {
+                    if (savedRegion.isNullOrBlank()) {
+                        "OCR 输入使用全屏：${fullBitmap.width}×${fullBitmap.height}"
+                    } else {
+                        "警告：已保存区域无法应用，回退全屏；请检查区域坐标"
+                    }
+                }
+            )
             val bitmap = prepared.bitmap
             val engine = ocrEngine ?: RapidOcrEngine(this).also { ocrEngine = it }
             val frame = engine.recognize(bitmap)
@@ -192,11 +203,11 @@ class ScreenCaptureService : Service() {
                 append(frame.regions.size)
                 append(" 行）")
                 if (frame.regions.isEmpty()) {
-                    append("\\n<未识别到任何文字>")
+                    append("\n<未识别到任何文字>")
                 } else {
                     frame.regions.forEachIndexed { index, line ->
                         val b = line.bounds
-                        append("\\n")
+                        append("\n")
                         append(index + 1)
                         append(". ")
                         append(line.text)
