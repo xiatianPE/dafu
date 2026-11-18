@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -12,7 +13,8 @@
         android:allowBackup="false"
         android:icon="@drawable/ic_launcher"
         android:label="达芙估价"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup,android:icon,android:label,android:theme">
 
         <activity android:name=".NativeControlActivity" android:exported="false" android:label="识别与出价" />
         <activity android:name=".ScreenCaptureActivity" android:exported="false" android:label="屏幕识别授权" />
