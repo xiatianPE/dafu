@@ -174,13 +174,13 @@ class ScreenCaptureService : Service() {
             val summary = (0 until (cards?.length() ?: 0)).joinToString(" · ") { index ->
                 val card = cards?.optJSONObject(index) ?: JSONObject()
                 val value = if (card.optBoolean("valueDetected")) card.optString("value") else "未读到数字"
-                "\${card.optString("title")}=$value"
+                "${card.optString("title")}=$value"
             }
-            val logSummary = "\${parsed.optString("status")} | $summary"
+            val logSummary = "${parsed.optString("status")} | $summary"
             if (logSummary != lastRecognitionSummary) {
                 NativeLog.add(
-                    "PP-OCR：\${parsed.optInt("detectedCount")}/3 张卡片 | " +
-                        "\${frame.elapsedSeconds}s | $logSummary"
+                    "PP-OCR：${parsed.optInt("detectedCount")}/3 张卡片 | " +
+                        "${frame.elapsedSeconds}s | $logSummary"
                 )
                 lastRecognitionSummary = logSummary
             }
