@@ -158,10 +158,10 @@ class ScreenCaptureService : Service() {
             image.close()
             activeImage = null
 
-            prepared = OcrImagePreprocessor.prepare(
-                fullBitmap,
-                Store.get("dafu-ocr-region")
-            )
+            // Always OCR the complete captured screen first. Card matching happens
+            // only after the engine has returned every text region and its coordinates.
+            // Saved manual regions must not hide text during the initial full-screen pass.
+            prepared = OcrImagePreprocessor.prepare(fullBitmap, null)
             val bitmap = prepared.bitmap
             val engine = ocrEngine ?: RapidOcrEngine(this).also { ocrEngine = it }
             val frame = engine.recognize(bitmap)
