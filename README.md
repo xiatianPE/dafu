@@ -140,7 +140,10 @@ app/src/main/
     ├── MainActivity.kt      # 主界面与 WebView 容器
     ├── OverlayService.kt    # 悬浮窗服务
     ├── ScreenAssistService.kt  # 无障碍节点读取服务
-    ├── DebugActivity.kt     # 屏幕辅助调试面板
+    ├── ScreenCaptureService.kt # MediaProjection 全屏截图与 OCR 调度
+    ├── ScreenRecognition.kt   # 全屏 OCR 标题定位与数字归属
+    ├── ScreenCaptureActivity.kt # 屏幕捕获授权
+    ├── NativeControlActivity.kt # 原生识别与调试面板
     ├── Bridge.kt            # JS ↔ 原生通信
     ├── WebSetup.kt          # WebView 初始化配置
     └── Store.kt             # 本地数据存储
@@ -168,7 +171,7 @@ app/src/main/
 
 5. **权限与隐私**：应用需要悬浮窗与无障碍权限。无障碍服务能够读取前台界面的文本内容，请仅在理解其用途的前提下开启，并在不需要时及时关闭。本项目不主动上传任何数据，所有估价数据均保存在本地设备。
 
-6. **屏幕捕获未完成**：屏幕捕获相关代码仅为实验性功能，OCR 识别流程尚未完成，请勿依赖其结果。
+6. **识别准确性**：OCR 结果受游戏画面、文字清晰度、遮挡和布局变化影响，使用者应在实际设备上核对识别结果，不应将识别值视为绝对准确。
 
 7. **无担保**：本项目按"现状"提供，不附带任何明示或暗示的担保，包括但不限于适销性、特定用途适用性及不侵权的担保。作者不对因使用或无法使用本项目而产生的任何直接或间接损失负责。
 
