@@ -60,8 +60,8 @@ object AuctionCardRecognizer {
         for ((target, anchor) in anchors) {
             val nearby = ordered.filter { line ->
                 if (line === anchor) return@filter true
-                val dx = abs(line.bounds.centerX() - anchor.bounds.centerX())
-                val dy = line.bounds.centerY() - anchor.bounds.centerY()
+                val dx = abs(line.bounds.centerX() - anchor.bounds.centerX()).toDouble()
+                val dy = (line.bounds.centerY() - anchor.bounds.centerY()).toDouble()
                 dx <= (width * 0.38) && dy in (-height * 0.04)..(height * 0.34)
             }
             val phraseMatches = mutableListOf<PhraseMatch>()
