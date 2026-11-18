@@ -32,6 +32,9 @@ android {
 
 dependencies {
     implementation("androidx.webkit:webkit:1.11.0")
+    // Shizuku API for the optional wireless-ADB screen capture backend.
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
     // PP-OCRv4 Chinese mobile models + ONNX Runtime + OpenCV; bundled for offline inference.
     implementation("io.github.hzkitty:rapidocr4j-android:1.0.0")
 }
