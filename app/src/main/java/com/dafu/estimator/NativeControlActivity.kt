@@ -252,7 +252,16 @@ class NativeControlActivity : Activity() {
             val missingText=if(missing==null||missing.length()==0)"无" else (0 until missing.length()).joinToString("、"){missing.optString(it)}
             val missingValues=o.optJSONArray("missingValues")
             val missingValueText=if(missingValues==null||missingValues.length()==0)"无" else (0 until missingValues.length()).joinToString("、"){missingValues.optString(it)}
-            diagnostics.text="状态：${o.optString("status","等待识别")}\n检测卡片：${o.optInt("detectedCount")}/3\n数字有效：${o.optInt("valueDetectedCount")}/3\n未找到：$missingText\n未读到数字：$missingValueText\n识别范围：${if(o.optBoolean("regionUsed"))"手动区域" else "全屏"}\n\n原始 OCR：\n${o.optString("rawText","").take(700)}"
+            val lineArray=o.optJSONArray("lines")
+            val lineDetails=(0 until (lineArray?.length()?:0)).joinToString("\n") { i ->
+                val item=lineArray?.optJSONObject(i) ?: JSONObject()
+                val text=item.optString("text")
+                val left=item.optInt("left"); val top=item.optInt("top")
+                val right=item.optInt("right"); val bottom=item.optInt("bottom")
+                val height=item.optInt("height",bottom-top)
+                "$i. $text  [x:$left-$right y:$top-$bottom h:$height px]"
+            }
+            diagnostics.text="状态：${o.optString("status","等待识别")}\n截图尺寸：${o.optInt("screenWidth")}×${o.optInt("screenHeight")}\nOCR 文字行：${o.optInt("lineCount")}\n检测卡片：${o.optInt("detectedCount")}/3\n数字有效：${o.optInt("valueDetectedCount")}/3\n未找到：$missingText\n未读到数字：$missingValueText\n识别范围：${if(o.optBoolean("regionUsed"))"手动区域" else "全屏"}\n\n逐行 OCR（含坐标/像素高度）：\n${lineDetails.ifBlank { "没有识别到文字行" }.take(12000)}"
         } catch(_:Exception) { }
         val raw=Store.get("dafu-auction-live") ?: return
         try {
