@@ -104,9 +104,14 @@ object ScreenRecognition {
             val target = anchor.target
             val nearby = assigned[anchor].orEmpty()
                 .sortedWith(compareBy<NearbyLine> { it.line.box.centerY() }.thenBy { it.line.box.centerX() })
-            val description = nearby.joinToString(" ") { it.line.text }
+            val cardLines = listOf(NearbyLine(anchor.line, 0.0)) + nearby
+            val description = cardLines
+                .sortedWith(compareBy<NearbyLine> { it.line.box.centerY() }.thenBy { it.line.box.centerX() })
+                .joinToString(" ") { it.line.text }
 
-            val numericCandidates = nearby.mapNotNull { item ->
+            // Also inspect the title line itself in case OCR placed the title
+            // and its numeric value on the same visual line.
+            val numericCandidates = cardLines.mapNotNull { item ->
                 val match = numberPattern.find(item.line.text) ?: return@mapNotNull null
                 val value = match.groupValues[1].replace(",", "")
                 val hintBonus = semanticHintBonus(target, item.line.text)
