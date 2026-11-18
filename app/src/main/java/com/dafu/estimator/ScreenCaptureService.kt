@@ -131,13 +131,27 @@ class ScreenCaptureService : Service() {
         try {
             val fullBitmap = imageToBitmap(image)
             image.close()
-            // Diagnostic-first mode: OCR the entire captured display.
-            // ScreenRecognition still extracts only the three requested intelligence cards.
-            val bitmap = fullBitmap
+            // Use a user-selected normalized region when available; otherwise keep full-screen mode.
+            val regionJson = Store.get("dafu-ocr-region")
+            var regionUsed = false
+            val bitmap = try {
+                if (!regionJson.isNullOrBlank()) {
+                    val region = JSONObject(regionJson)
+                    val left = (region.optDouble("left", 0.0) * fullBitmap.width).toInt().coerceIn(0, fullBitmap.width - 1)
+                    val top = (region.optDouble("top", 0.0) * fullBitmap.height).toInt().coerceIn(0, fullBitmap.height - 1)
+                    val right = (region.optDouble("right", 1.0) * fullBitmap.width).toInt().coerceIn(left + 1, fullBitmap.width)
+                    val bottom = (region.optDouble("bottom", 1.0) * fullBitmap.height).toInt().coerceIn(top + 1, fullBitmap.height)
+                    regionUsed = true
+                    Bitmap.createBitmap(fullBitmap, left, top, right - left, bottom - top).also {
+                        if (it !== fullBitmap) fullBitmap.recycle()
+                    }
+                } else fullBitmap
+            } catch (_: Exception) { fullBitmap }
             val input = InputImage.fromBitmap(bitmap, 0)
             recognizer.process(input)
                 .addOnSuccessListener { text ->
                     val parsed = ScreenRecognition.parse(text, bitmap.width, bitmap.height)
+                    parsed.put("regionUsed", regionUsed)
                     latestJson = parsed.toString()
                     val cards = parsed.optJSONArray("intelCards")
                     val summary = (0 until (cards?.length() ?: 0)).joinToString(" · ") { index ->
