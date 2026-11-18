@@ -135,7 +135,7 @@ class NativeControlActivity : Activity() {
             NativeLog.add("用户停止屏幕 OCR")
         }
         body.addView(buttonRow(startOcr, stopOcr), space(0, 0, 0, 14))
-        body.addView(sectionTitle("屏幕识别结果", "回合、中央情报、出价按钮与数字键盘"))
+        body.addView(sectionTitle("屏幕识别结果", "全屏自动定位三张情报卡并提取数字"))
         val recognitionCard = cardBox()
         recognitionView = label("等待屏幕 OCR…", 12f, mutedColor)
         recognitionView.setLineSpacing(dp(3).toFloat(), 1f)
@@ -219,18 +219,30 @@ class NativeControlActivity : Activity() {
             try {
                 val o = JSONObject(ScreenCaptureService.latestJson)
                 val cards = o.optJSONArray("intelCards")
-                val cardText = (0 until (cards?.length() ?: 0)).mapNotNull { i ->
-                    cards?.optJSONObject(i)?.let { "• " + it.optString("title") + if (it.optString("description").isNotBlank()) "： " + it.optString("description") else "" }
-                }.joinToString("\n")
+                val byType = (0 until (cards?.length() ?: 0)).mapNotNull { i ->
+                    cards?.optJSONObject(i)?.let { it.optString("type") to it }
+                }.toMap()
+                fun cardValue(type: String): String {
+                    val card = byType[type] ?: return "未找到卡片"
+                    return if (card.optBoolean("valueDetected")) {
+                        card.optString("value") + card.optString("unit")
+                    } else {
+                        "卡片已找到，数字未识别"
+                    }
+                }
                 val missing = o.optJSONArray("missingTargets")
                 val missingText = if (missing == null || missing.length() == 0) "无" else
                     (0 until missing.length()).joinToString("、") { missing.optString(it) }
+                val missingValues = o.optJSONArray("missingValues")
+                val missingValueText = if (missingValues == null || missingValues.length() == 0) "无" else
+                    (0 until missingValues.length()).joinToString("、") { missingValues.optString(it) }
                 recognitionView.text = "识别状态：" + o.optString("status", if (ScreenCaptureService.running) "识别中" else "未启动") +
                     "\n识别数量：" + o.optInt("detectedCount") + "/" + o.optInt("expectedCount", 3) +
-                    "\n千眼其一：" + if (o.optJSONArray("intelCards")?.toString()?.contains("auction_info") == true) "已识别" else "未识别" +
-                    "\n紫品计数仪器：" + if (o.optJSONArray("intelCards")?.toString()?.contains("purple_count") == true) "已识别" else "未识别" +
-                    "\n金品均价仪器：" + if (o.optJSONArray("intelCards")?.toString()?.contains("gold_average") == true) "已识别" else "未识别" +
-                    "\n缺失项目：" + missingText +
+                    "\n千眼其一：" + cardValue("auction_info") +
+                    "\n紫品计数仪器：" + cardValue("purple_count") +
+                    "\n金品均价仪器：" + cardValue("gold_average") +
+                    "\n未找到卡片：" + missingText +
+                    "\n未识别数字：" + missingValueText +
                     "\n原始文字：" + o.optString("rawText", "").take(500)
             } catch (_: Exception) { recognitionView.text = "等待屏幕 OCR 授权或识别结果…" }
         }
