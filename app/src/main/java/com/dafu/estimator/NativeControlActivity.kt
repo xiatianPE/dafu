@@ -261,7 +261,8 @@ class NativeControlActivity : Activity() {
                 val height=item.optInt("height",bottom-top)
                 "$i. $text  [x:$left-$right y:$top-$bottom h:$height px conf:${item.optDouble("confidence",0.0)}]"
             }
-            val timing=o.optJSONObject("timing") ?: JSONObject()\n            diagnostics.text="状态：${o.optString("status","等待识别")}\nOCR 引擎：${o.optString("engine","初始化中")}\n耗时：${timing.optDouble("totalSeconds",0.0)}s（检测 ${timing.optDouble("detectionSeconds",0.0)}s / 识别 ${timing.optDouble("recognitionSeconds",0.0)}s）\n截图尺寸：${o.optInt("screenWidth")}×${o.optInt("screenHeight")}\nOCR 文字行：${o.optInt("lineCount")}\n检测卡片：${o.optInt("detectedCount")}/3\n数字有效：${o.optInt("valueDetectedCount")}/3\n未找到：$missingText\n未读到数字：$missingValueText\n识别范围：${if(o.optBoolean("regionUsed"))"手动区域" else "全屏"}\n\n逐行 OCR（含坐标/像素高度）：\n${lineDetails.ifBlank { "没有识别到文字行" }.take(12000)}"
+            val timing=o.optJSONObject("timing") ?: JSONObject()
+            diagnostics.text="状态：${o.optString("status","等待识别")}\nOCR 引擎：${o.optString("engine","初始化中")}\n耗时：${timing.optDouble("totalSeconds",0.0)}s（检测 ${timing.optDouble("detectionSeconds",0.0)}s / 识别 ${timing.optDouble("recognitionSeconds",0.0)}s）\n截图尺寸：${o.optInt("screenWidth")}×${o.optInt("screenHeight")}\nOCR 文字行：${o.optInt("lineCount")}\n检测卡片：${o.optInt("detectedCount")}/3\n数字有效：${o.optInt("valueDetectedCount")}/3\n未找到：$missingText\n未读到数字：$missingValueText\n识别范围：${if(o.optBoolean("regionUsed"))"手动区域" else "全屏"}\n\n逐行 OCR（含坐标/像素高度）：\n${lineDetails.ifBlank { "没有识别到文字行" }.take(12000)}"
         } catch(_:Exception) { }
         val raw=Store.get("dafu-auction-live") ?: return
         try {
