@@ -99,6 +99,14 @@ class NativeControlActivity : Activity() {
         regionState = label("识别范围：全屏", 12.5f, muted)
         captureCard.addView(captureState)
         captureCard.addView(regionState, LinearLayout.LayoutParams(-1,-2).apply { topMargin = dp(6) })
+        val shizukuTest = button("测试 Shizuku 无线 ADB 截屏", 0) {
+            NativeLog.add("开始 Shizuku 截屏能力测试")
+            ShizukuCaptureManager.capture(this) { result ->
+                NativeLog.add("Shizuku 截屏测试：" + result)
+                Toast.makeText(this, result, Toast.LENGTH_LONG).show()
+            }
+        }
+        captureCard.addView(shizukuTest, LinearLayout.LayoutParams(-1,dp(46)).apply { topMargin = dp(12) })
         val start = button("开启屏幕识别", 1) {
             ScreenCaptureActivity.launch(this)
             Toast.makeText(this, "请允许屏幕共享；识别在本机离线进行", Toast.LENGTH_LONG).show()
