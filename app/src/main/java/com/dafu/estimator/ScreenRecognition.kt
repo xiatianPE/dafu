@@ -47,6 +47,7 @@ object ScreenRecognition {
                             .put("left", box.left).put("top", box.top)
                             .put("right", box.right).put("bottom", box.bottom)
                             .put("cx", box.centerX()).put("cy", box.centerY())
+                            .put("width", box.width()).put("height", box.height())
                     )
                 }
             }
@@ -94,30 +95,42 @@ object ScreenRecognition {
 
         for (anchor in anchors) {
             val target = anchor.target
+            // OCR often splits one card description across multiple Text.Line objects.
+            // Collect a wider local neighborhood and match joined windows of up to 3 lines.
             val localLines = ordered.filter { line ->
                 if (line == anchor.line) return@filter false
                 val dx = abs(line.box.centerX() - anchor.line.box.centerX()).toDouble()
                 val dy = line.box.centerY() - anchor.line.box.centerY().toDouble()
-                // Description is below the title in the card. Tight bounds prevent
-                // values from the inventory, top HUD and neighboring cards leaking in.
-                dx <= (safeWidth * 0.18) && dy in 0.0..(safeHeight * 0.14)
+                dx <= (safeWidth * 0.30) && dy in (-safeHeight * 0.03)..(safeHeight * 0.30)
             }
-
-            val matchingDescription = (listOf(anchor.line) + localLines)
-                .filter { isTargetDescription(target, it.text) }
-                .sortedBy { abs(it.box.centerY() - anchor.line.box.centerY()) }
-            val bestLine = matchingDescription.firstOrNull()
-            val bestNumber = bestLine?.let { line ->
-                numberPattern.findAll(line.text)
-                    .map { it.groupValues[1].replace(",", "") }
-                    .firstOrNull()
+            val nearby = (listOf(anchor.line) + localLines).distinct()
+                .sortedWith(compareBy<OcrLine> { it.box.centerY() }.thenBy { it.box.centerX() })
+            data class PhraseMatch(val text: String, val centerY: Double, val score: Int)
+            val phraseMatches = mutableListOf<PhraseMatch>()
+            for (i in nearby.indices) {
+                var joined = ""
+                for (j in i..minOf(nearby.lastIndex, i + 2)) {
+                    joined += nearby[j].text
+                    if (isTargetDescription(target, joined)) {
+                        val center = (nearby[i].box.centerY() + nearby[j].box.centerY()) / 2.0
+                        phraseMatches += PhraseMatch(joined, center, joined.length)
+                    }
+                }
+            }
+            val bestPhrase = phraseMatches.maxByOrNull { it.score }
+            val numberLines = nearby.mapNotNull { line ->
+                val number = numberPattern.findAll(line.text)
+                    .map { it.groupValues[1].replace(",", "") }.firstOrNull()
+                if (number == null) null else line to number
+            }
+            val bestNumber = if (bestPhrase != null) {
+                numberLines.minByOrNull { abs(it.first.box.centerY() - bestPhrase.centerY) }?.second
+            } else {
+                val joinedLocal = nearby.joinToString("") { it.text }
+                if (isTargetDescription(target, joinedLocal)) numberLines.firstOrNull()?.second else null
             }
             if (bestNumber == null) missingValues.put(target.title)
-
-            val description = (listOf(anchor.line) + localLines)
-                .sortedWith(compareBy<OcrLine> { it.box.centerY() }.thenBy { it.box.centerX() })
-                .joinToString(" ") { it.text }
-
+            val description = nearby.joinToString(" ") { it.text }
             cards.put(
                 JSONObject()
                     .put("title", target.title)
@@ -125,7 +138,7 @@ object ScreenRecognition {
                     .put("detected", true)
                     .put("anchorText", anchor.line.text)
                     .put("description", description)
-                    .put("matchedDescription", bestLine?.text ?: "")
+                    .put("matchedDescription", bestPhrase?.text ?: "")
                     .put("value", bestNumber ?: "")
                     .put("unit", target.unit)
                     .put("valueDetected", bestNumber != null)
@@ -133,7 +146,6 @@ object ScreenRecognition {
                     .put("y", anchor.line.box.centerY())
             )
         }
-
         val detected = anchors.size
         val valueDetected = (0 until cards.length()).count {
             cards.optJSONObject(it)?.optBoolean("valueDetected") == true
