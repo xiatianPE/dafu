@@ -1,6 +1,10 @@
 package com.dafu.estimator
 
 import android.app.Service
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -31,8 +35,24 @@ class RegionSelectionService : Service() {
     override fun onBind(intent: android.content.Intent?): IBinder? = null
     override fun onCreate() { super.onCreate(); wm = getSystemService(WINDOW_SERVICE) as WindowManager }
     override fun onStartCommand(intent: android.content.Intent?, flags: Int, startId: Int): Int {
+        startForegroundCompat()
         if (root == null) showSelector()
         return START_NOT_STICKY
+    }
+    private fun startForegroundCompat() {
+        val channelId = "dafu_region_selector"
+        val manager = getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= 26) manager.createNotificationChannel(
+            NotificationChannel(channelId, "达芙区域框选", NotificationManager.IMPORTANCE_LOW)
+        )
+        val notification = if (Build.VERSION.SDK_INT >= 26) Notification.Builder(this, channelId)
+            else @Suppress("DEPRECATION") Notification.Builder(this)
+        notification.setSmallIcon(R.drawable.ic_stat)
+            .setContentTitle("达芙正在框选识别区域")
+            .setContentText("拖动屏幕选择拍卖情报卡区域")
+            .setOngoing(true)
+        if (Build.VERSION.SDK_INT >= 34) startForeground(22, notification.build(), android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        else startForeground(22, notification.build())
     }
     private fun showSelector() {
         val frame = FrameLayout(this)
@@ -113,6 +133,8 @@ class RegionSelectionService : Service() {
     private fun dp(v: Int) = (v * resources.displayMetrics.density).toInt()
     override fun onDestroy() {
         root?.let { try { wm.removeViewImmediate(it) } catch (_: Exception) {} }
-        root = null; selector = null; super.onDestroy()
+        root = null; selector = null
+        stopForeground(true)
+        super.onDestroy()
     }
 }
