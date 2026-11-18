@@ -14,7 +14,8 @@
         android:icon="@drawable/ic_launcher"
         android:label="达芙估价"
         android:theme="@style/AppTheme"
-        tools:replace="android:allowBackup,android:icon,android:label,android:theme">
+        tools:replace="android:allowBackup,android:icon,android:label,android:theme"
+        tools:remove="android:roundIcon">
 
         <activity android:name=".NativeControlActivity" android:exported="false" android:label="识别与出价" />
         <activity android:name=".ScreenCaptureActivity" android:exported="false" android:label="屏幕识别授权" />
