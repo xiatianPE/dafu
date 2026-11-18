@@ -41,6 +41,7 @@ class ScreenCaptureService : Service() {
     private val recognizer by lazy { TextRecognition.getClient(ChineseTextRecognizerOptions.Builder().build()) }
     private val processing = AtomicBoolean(false)
     private var lastProcessAt = 0L
+    private var lastRecognitionSummary = ""
     private var screenWidth = 0
     private var screenHeight = 0
     private var screenDensity = 0
@@ -138,16 +139,39 @@ class ScreenCaptureService : Service() {
                 .addOnSuccessListener { text ->
                     val parsed = ScreenRecognition.parse(text, bitmap.width, bitmap.height)
                     latestJson = parsed.toString()
-                    NativeLog.add("OCR情报识别：${parsed.optInt("detectedCount")}/${parsed.optInt("expectedCount")}，状态=${parsed.optString("status")}，缺失=${parsed.optJSONArray("missingTargets")}")
+                    val cards = parsed.optJSONArray("intelCards")
+                    val summary = (0 until (cards?.length() ?: 0)).joinToString(" · ") { index ->
+                        val card = cards?.optJSONObject(index) ?: JSONObject()
+                        val value = if (card.optBoolean("valueDetected")) card.optString("value") else "未读到数字"
+                        "${card.optString("title")}=$value"
+                    }
+                    val logSummary = "${parsed.optString("status")} | $summary"
+                    if (logSummary != lastRecognitionSummary) {
+                        NativeLog.add("全屏 OCR：${parsed.optInt("detectedCount")}/3 张卡片 | $logSummary")
+                        lastRecognitionSummary = logSummary
+                    }
                     Store.set("dafu-screen-recognition", latestJson)
                 }
                 .addOnFailureListener { e ->
-                    latestJson = JSONObject().put("status", "ocr_error").put("message", e.message ?: "识别失败").toString()
+                    latestJson = JSONObject()
+                        .put("source", "full_screen_ocr")
+                        .put("status", "ocr_error")
+                        .put("message", e.message ?: "识别失败")
+                        .put("capturedAt", System.currentTimeMillis())
+                        .toString()
+                    Store.set("dafu-screen-recognition", latestJson)
                     NativeLog.add("OCR 识别失败：" + (e.message ?: e.javaClass.simpleName))
                 }
                 .addOnCompleteListener { bitmap.recycle(); processing.set(false) }
         } catch (e: Exception) {
             try { image.close() } catch (_: Exception) {}
+            latestJson = JSONObject()
+                .put("source", "full_screen_ocr")
+                .put("status", "frame_error")
+                .put("message", e.message ?: e.javaClass.simpleName)
+                .put("capturedAt", System.currentTimeMillis())
+                .toString()
+            Store.set("dafu-screen-recognition", latestJson)
             processing.set(false)
             NativeLog.add("处理屏幕帧失败：" + (e.message ?: e.javaClass.simpleName))
         }
